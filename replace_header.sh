@@ -1,0 +1,1 @@
+sed 's/\#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	group1.group1	group19.group19	group2.group2	group24.group24	group3.group3	group4.group4	group5.group5	group6.group6/ABCDEFHGKJFLSDFIJSLDIFJ :LIFJ FIOJ WOEFIJOWEFIJOWEIFJ/' $1 > $1.new
