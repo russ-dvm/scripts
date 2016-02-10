@@ -6,6 +6,8 @@ use warnings;
 #R.Fraser, rfrase03@uoguelph.ca, 2016/02/05. 
 #Takes input from Promo3, isolates factors with a predicted RE (query) value of less than a prompted value, and then outputs in either list or bed format.
 
+#add a quick comment.
+
 open (my $tf_file, "<", $ARGV[0]);
 open (my $output, ">", $ARGV[1]);
 
