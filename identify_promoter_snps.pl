@@ -34,7 +34,7 @@ while (my $bed_line = <$bed_file>) {
 	
 	foreach my $snp (@snps) {
 		if ( $snp >= $start_pos && $snp <= $end_pos) {
-			print "$bed_line | snp=$snp\n";
+			print $output "$bed_line | snp=$snp\n";
 		}
 	}
 }
