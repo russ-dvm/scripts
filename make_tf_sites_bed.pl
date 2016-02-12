@@ -37,9 +37,6 @@ die "\nImproper usage.\n\nTry: perl <script> <input_file_from_promo> <output>\n\
 	# \t--cutoff\tSpecify the cutoff value of RE
 	# \t\t\t(Default: 100)\n\n");
 	# 
-
-
-
 	
 
 print "Format (list or bed)?: ";
@@ -62,6 +59,8 @@ if (($format eq "list") or ($format eq "bed")) {
 			my @genome_info = split(":", $field[0]);
 				my $chrom = $genome_info[2];
 				my $start_pos = $genome_info[3];
+				my $end_pos = $genome_info[4];
+				my $direction = $genome_info[5];
 	
 			my $trans_factor = $field[1];	
 	
@@ -74,11 +73,17 @@ if (($format eq "list") or ($format eq "bed")) {
 			my $re_query = $field[7];
 			
 
-			if ($re_query < 5){
 
-				my $genome_start = "$start_pos" + "$trans_factor_start";
-				my $genome_end = "$start_pos" + "$trans_factor_end";
-
+			if ($re_query < $cutoff){
+				my ($genome_start, $genome_end);
+				if ($direction > 0) {			
+					$genome_start = "$start_pos" + "$trans_factor_start";
+					$genome_end = "$start_pos" + "$trans_factor_end";
+				}
+				else {
+					$genome_start = "$end_pos" - "$trans_factor_end";
+					$genome_end = "$end_pos" - "$trans_factor_start";
+				}
 				#list format		
 				if ($format eq "list") {
 					print $output "$chrom:$genome_start-$genome_end\t$trans_factor |$trans_factor_seq |$re_query\n";
