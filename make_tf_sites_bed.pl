@@ -39,15 +39,15 @@ die "\nImproper usage.\n\nTry: perl <script> <input_file_from_promo> <output>\n\
 	# 
 	
 
-print "Format (list or bed)?: ";
-my $format = <STDIN>;
-chomp $format;
+# print "Format (list or bed)?: ";
+# my $format = <STDIN>;
+# chomp $format;
+# 
+# print "Minimum length of TF sequence?: ";
+# my $cutoff = <STDIN>;
+# chomp $cutoff;
 
-print "Cutoff value?: ";
-my $cutoff = <STDIN>;
-chomp $cutoff;
-
-if (($format eq "list") or ($format eq "bed")) {
+# if (($format eq "list") or ($format eq "bed")) {
 	while (my $line = <$tf_file>) {
 	
 	
@@ -69,12 +69,15 @@ if (($format eq "list") or ($format eq "bed")) {
 			my $trans_factor_end = $field[3];
 				$trans_factor_end =~ s/^\s+//;
 			my $trans_factor_seq = $field[5];
-
+				$trans_factor_seq =~ s/^\s+//;
+					
+			my $tf_seq_length = length($trans_factor_seq);
+		
 			my $re_query = $field[7];
 			
 
 
-			if ($re_query < $cutoff){
+			if ($tf_seq_length >= 4){
 				my ($genome_start, $genome_end);
 				if ($direction > 0) {			
 					$genome_start = "$start_pos" + "$trans_factor_start";
@@ -84,23 +87,23 @@ if (($format eq "list") or ($format eq "bed")) {
 					$genome_start = "$end_pos" - "$trans_factor_end";
 					$genome_end = "$end_pos" - "$trans_factor_start";
 				}
-				#list format		
-				if ($format eq "list") {
-					print $output "$chrom:$genome_start-$genome_end\t$trans_factor |$trans_factor_seq |$re_query\n";
-				}
+# 				list format		
+# 				if ($format eq "list") {
+# 					print $output "$chrom:$genome_start-$genome_end\t$trans_factor | $trans_factor_seq |$re_query\n";
+# 				}
 
 				#bed format
-				elsif ($format eq "bed") {
-					print $output "chr$chrom\t$genome_start\t$genome_end\t$trans_factor |$trans_factor_seq |$re_query\n";
-				}
+# 				elsif ($format eq "bed") {
+					print $output "chr$chrom\t$genome_start\t$genome_end\t$trans_factor | $trans_factor_seq |$re_query\n";
+# 				}
 			}
 		}
 	}
-}
+# }
 
-else {
-	die "\nWrong value entered. Bye.\n\n";
-	}
+# else {
+# 	die "\nWrong value entered. Bye.\n\n";
+# 	}
 
 close $tf_file;
 close $output;

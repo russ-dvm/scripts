@@ -4,7 +4,7 @@
 #check if the summary table exists
 
 #default directory
-table=/media/russ/data/bovine/merged_runs/5_filter_testing/filter_stats_summary_table.txt
+table=/media/russ/data/porcine/4_variants/filter_stats.txt
 
 
 #check if table already exists

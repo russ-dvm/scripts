@@ -28,8 +28,8 @@ then
 	echo "############################################################"
 	echo
 else
-	read -p "Run snpeff? " run_snpeff
-	if [[ $run_snpeff == "y" ]] || [[ $run_snpeff == "Y" ]]
+	read -p "Run snpeff (y or Y)? " run_snpeff
+	if [[ $run_snpeff == "y" ]] || [[ $run_snpeff == "Y" ]] || [[ $run_snpeff == "yes" ]]
 	then
 	##First run snpEff at defaults##
 	echo
@@ -51,92 +51,127 @@ else
 	[lL]* )
 			#variables for lectins or pglyrps
 			family=lectin
-			gene_interval=/media/russ/data/bovine/ref_files/lectin_intervals.intervals
+			gene_interval=/media/russ/data/bovine/ref_files/lectin_intervals.bed
 						
 			echo "Lectins it is!"
 			echo "Let's do it!"
 			mkdir -p $family
 			#MAKE VCF FILES WITH ONLY LECTINS
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -L $gene_interval -V $base.vcf -o $family/$base.$family.vcf
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -L $gene_interval -V $base.50kb.vcf -o $family/$base.$family.50kb.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -L $gene_interval -V $base.vcf -o $family/$base.all.$family.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -L $gene_interval -V $base.50kb.vcf -o $family/$base.all.$family.50kb.vcf
 			
-			#SPLIT INTO NORMAL AND DISEASED
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group1 -sn group2 -sn group3 -sn group4 -sn group5 -sn group6 -sn group7 -sn group8 -V $family/$base.$family.vcf -o $family/$base.normal.$family.vcf
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.$family.vcf -o $family/$base.diseased.$family.vcf
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group1 -sn group2 -sn group3 -sn group4 -sn group5 -sn group6 -sn group7 -sn group8 -V $family/$base.$family.50kb.vcf -o $family/$base.normal.$family.50kb.vcf
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.$family.50kb.vcf -o $family/$base.diseased.$family.50kb.vcf
+			#SPLIT INTO NORMAL AND DISEASED FOR BOTH UPSTREAM TYPES
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group1 -sn group2 -sn group3 -sn group4 -sn group5 -sn group6 -sn group7 -sn group8 -V $family/$base.all.$family.vcf -o $family/$base.normal.$family.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.all.$family.vcf -o $family/$base.diseased.$family.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group1 -sn group2 -sn group3 -sn group4 -sn group5 -sn group6 -sn group7 -sn group8 -V $family/$base.all.$family.50kb.vcf -o $family/$base.normal.$family.50kb.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.all.$family.50kb.vcf -o $family/$base.diseased.$family.50kb.vcf
 			
+			#MAKE SUBDIRECTORIES FOR ALL THE DIFFERENT REGIONS & GENES
 			for x in coding intron downstream upstream 50kb_up
 			do
 				mkdir -p $family/$x
-				for gene_array in colec10 colec11 colec12 colec43 colec46 cgn mbl1 mbl2 sftpa sftpd fcn1 fcn3 masp1 masp2
+				for gene_array in colec10 colec11 colec12 colec43 colec46 cgn mbl1 mbl2 sftpa sftpd fcn2 fcn3 masp1 masp2
 				do
 					mkdir -p $family/$x/$gene_array
 				done
 			done
 			
+			#TIDY UP
 			mv $family/*50kb.vcf* $family/50kb_up
 			
 			#Files are now prepped and ready to be split into regions & genes.
-# 			colec46=ENSBTAG00000048082
-# 			cgn=ENSBTAG00000006536
-# 			colec43=ENSBTAG00000047317
-# 			mbl1=ENSBTAT00000001165 #transcript reference - gene reference is combined with SFTPA1 in ensembl
-# 			sftpa=ENSBTAT00000031298 #transcript reference - gene reference is combined with SFTPA1 in ensembl
-# 			fcn1=ENSBTAG00000048155
 			
-			for nd in normal diseased
+			#Hash with ensembl references and gene names
+			declare -A gene_hash
+			gene_hash=(
+				["ENSBTAG00000017343"]="colec10"
+				["ENSBTAG00000016225"]="colec11"
+				["ENSBTAG00000007705"]="colec12"
+				#["ENSBTAG00000048155"]="FCN1"
+				["ENSBTAG00000048155"]="fcn2"
+				# FCN3 not found
+				["ENSBTAG00000012467"]="masp1"
+				["ENSBTAG00000012808"]="masp2"
+				["ENSBTAT00000001165.3"]="mbl1" #transcript_reference
+				["ENSBTAG00000007049"]="mbl2"
+				["ENSBTAT00000031298.3"]="sftpa"	#transcript_reference
+				["ENSBTAG00000046421"]="sftpd"
+				["ENSBTAG00000006536"]="cgn"
+				["ENSBTAG00000048082"]="colec46"
+				["ENSBTAG00000047317"]="colec43"
+				)
+
+			
+			for nd in normal diseased all
 			do
 				for x in coding intron downstream upstream 50kb_up
 				do
-					for gene_array in colec10 colec11 colec12 colec43 colec46 cgn mbl1 mbl2 sftpa sftpd fcn1 fcn3 masp1 masp2
+					for snpeff_gene in ${!gene_hash[@]}
 					do
-						ann_type=ANN[*].GENE
-						if [[ $gene_array == "colec43" ]]
+						gene_array="${gene_hash[$snpeff_gene]}"
+
+						if [[ $gene_array == "mbl1" ]] || [[ $gene_array == "sftpa" ]]
 						then
-							snpeff_gene=ENSBTAG00000047317
-						elif [[ $gene_array == "colec46" ]]
-						then
-							snpeff_gene=ENSBTAG00000048082
-						elif [[ $gene_array == "cgn" ]]
-						then
-							snpeff_gene=ENSBTAG00000006536
-						elif [[ $gene_array == "mbl1" ]]
-						then
-							snpeff_gene=ENSBTAT00000001165.3
 							ann_type=ANN[*].TRID
-						elif [[ $gene_array == "sftpa" ]]
-						then
-							snpeff_gene=ENSBTAT00000031298.3
-							ann_type=ANN[*].TRID
-						elif [[ $gene_array == "fcn1" ]]
-						then
-							snpeff_gene=ENSBTAG00000048155
-						elif [[ $gene_array == "fcn3" ]]
-						then
-							snpeff_gene=FIX_ME_PLEASE_THIS_ISNT_RIGHT
 						else
-							snpeff_gene=$(echo $gene_array | tr [:lower:] [:upper:])
+							ann_type=ANN[*].GENEID
 						fi
+# 					for gene_array in colec10 colec11 colec12 colec43 colec46 cgn mbl1 mbl2 sftpa sftpd fcn1 fcn3 masp1 masp2
+# 					do
+# 					
+# 						ann_type=ANN[*].GENE
+# 						if [[ $gene_array == "colec43" ]]
+# 						then
+# 							snpeff_gene=ENSBTAG00000047317
+# 						elif [[ $gene_array == "colec46" ]]
+# 						then
+# 							snpeff_gene=ENSBTAG00000048082
+# 						elif [[ $gene_array == "cgn" ]]
+# 						then
+# 							snpeff_gene=ENSBTAG00000006536
+# 						elif [[ $gene_array == "mbl1" ]]
+# 						then
+# 							snpeff_gene=ENSBTAT00000001165.3
+# 							ann_type=ANN[*].TRID
+# 						elif [[ $gene_array == "sftpa" ]]
+# 						then
+# 							snpeff_gene=ENSBTAT00000031298.3
+# 							ann_type=ANN[*].TRID
+# 						elif [[ $gene_array == "fcn1" ]]
+# 						then
+# 							snpeff_gene=ENSBTAG00000048155
+# 						elif [[ $gene_array == "fcn3" ]]
+# 						then
+# 							snpeff_gene=FIX_ME_PLEASE_THIS_ISNT_RIGHT
+# 						else
+# 							snpeff_gene=$(echo $gene_array | tr [:lower:] [:upper:])
+# 						fi
+
+
 						if [[ $x != "50kb_up" ]]
 						then
 							if [[ $x == "intron" ]]
 							then
 								type=intron_variant							
-								echo $nd,$x,$gene_array
+								echo $nd,$x,$gene_array, $type, $ann_type
 								java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has '$type') && ($ann_type = '$snpeff_gene')" $family/$base.$nd.$family.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
-							elif [[ $x == "downstream" ]] || [[ $x == "upstream" ]]
+							elif [[ $x == "upstream" ]]
 							then
-								echo $nd,$x,$gene_array
+								echo $nd,$x,$gene_array, $type, $ann_type
 								type="$x"_gene_variant
-								java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has '$type') && ($ann_type = '$snpeff_gene')" $family/$base.$nd.$family.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
+								java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has '$type') && ($ann_type = '$snpeff_gene') | (ANN[*].EFFECT has '5_prime_UTR_variant') && ($ann_type = '$snpeff_gene')" $family/$base.$nd.$family.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
+							elif [[ $x == "downstream" ]]
+							then
+								echo $nd,$x,$gene_array, $type, $ann_type
+								type="$x"_gene_variant
+								java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has '$type') && ($ann_type = '$snpeff_gene') | (ANN[*].EFFECT has '3_prime_UTR_variant') && ($ann_type = '$snpeff_gene')" $family/$base.$nd.$family.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
 							else
-								echo $nd,$x,$gene_array
+								echo $nd,$x,$gene_array, $type, $ann_type
 								java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has 'missense_variant') && ($ann_type = '$snpeff_gene') | (ANN[*].EFFECT has 'synonymous_variant') && ($ann_type = '$snpeff_gene') | (ANN[*].EFFECT has 'stop_gained') && ($ann_type = '$snpeff_gene')" $family/$base.$nd.$family.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
 							fi
 						else
-							echo $nd,$x,$gene_array
-							java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has 'upstream_gene_variant') && ($ann_type = '$snpeff_gene')" $family/50kb_up/$base.$nd.$family.50kb.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
+							echo $nd,$x,$gene_array, $type, $ann_type
+							java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has 'upstream_gene_variant') && ($ann_type = '$snpeff_gene') | (ANN[*].EFFECT has '5_prime_UTR_variant') && ($ann_type = '$snpeff_gene')" $family/50kb_up/$base.$nd.$family.50kb.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
 						fi
 					done
 				done
@@ -154,14 +189,14 @@ else
 						
 			mkdir -p $family
 			#MAKE VCF FILES WITH ONLY PGLYRPS OR LECTINS
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -L $gene_interval -V $base.vcf -o $family/$base.$family.vcf
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -L $gene_interval -V $base.50kb.vcf -o $family/$base.$family.50kb.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -L $gene_interval -V $base.vcf -o $family/$base.all.$family.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -L $gene_interval -V $base.50kb.vcf -o $family/$base.all.$family.50kb.vcf
 			
 			#SPLIT INTO NORMAL AND DISEASED
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group1 -sn group2 -sn group3 -sn group4 -sn group5 -sn group6 -sn group7 -sn group8 -V $family/$base.$family.vcf -o $family/$base.normal.$family.vcf
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.$family.vcf -o $family/$base.diseased.$family.vcf
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group1 -sn group2 -sn group3 -sn group4 -sn group5 -sn group6 -sn group7 -sn group8 -V $family/$base.$family.50kb.vcf -o $family/$base.normal.$family.50kb.vcf
-			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.$family.50kb.vcf -o $family/$base.diseased.$family.50kb.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group1 -sn group2 -sn group3 -sn group4 -sn group5 -sn group6 -sn group7 -sn group8 -V $family/$base.all.$family.vcf -o $family/$base.normal.$family.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.all.$family.vcf -o $family/$base.diseased.$family.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group1 -sn group2 -sn group3 -sn group4 -sn group5 -sn group6 -sn group7 -sn group8 -V $family/$base.all.$family.50kb.vcf -o $family/$base.normal.$family.50kb.vcf
+			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.all.$family.50kb.vcf -o $family/$base.diseased.$family.50kb.vcf
 			
 			for x in coding intron downstream upstream 50kb_up
 			do

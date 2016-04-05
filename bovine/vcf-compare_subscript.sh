@@ -14,7 +14,7 @@ for x in coding intron upstream downstream 50kb_up
 do
 	if [[ $family == "lectin" ]]
 	then
-		for gene_array in colec10 colec11 colec12 colec43 colec46 cgn mbl1 mbl2 sftpa sftpd fcn1 fcn3 masp1 masp2
+		for gene_array in colec10 colec11 colec12 colec43 colec46 cgn mbl1 mbl2 sftpa sftpd fcn2 fcn3 masp1 masp2
 		do
 			for nd in normal diseased
 			do

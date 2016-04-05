@@ -8,7 +8,7 @@ open (my $vcf_file, "<", $ARGV[0]);
 open (my $bed_file, "<", $ARGV[1]);
 open (my $output, ">", $ARGV[2]);
 # 
-# die "\n\nWrong usage\n\n" if $ARGV < 3;
+die "\nWrong usage.\n\nperl identify_promoter_snps <vcf-input> <bed-input> <output>\n\n" if @ARGV < 3;
 
 my ($snp_position, $start_pos, $end_pos, @snps);
 
