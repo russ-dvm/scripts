@@ -86,8 +86,15 @@ for (my $i=1; $i <= $#qtl_array; $i++) {
 	open (my $output, ">", "files/$outfile");
 
 	#Header line for the genotype & expression data table
-	print $output "animal\tgenotype\texpression.$expression_data[0]\n";
+	print $output "animal\tgenotype\texpression.$expression_data[0]\tgenotype_letters\n";
 	
+	#get the reference and alternate allele from the original VCF file
+	my @vcf_match = grep {/$qtl_fields[2]/} @vcf_array;
+	my @vcf_fields = split("\t", $vcf_match[0]);
+	my $ref_allele = $vcf_fields[3];
+	my $alt_allele = $vcf_fields[4];
+	my ($genotype_letters);
+
 	#Print the individual pig genotype and expression into rows
 	for (my $i=1; $i <= $#genotype_data; $i++) {
 		chomp $genotype_header[$i];
@@ -97,26 +104,30 @@ for (my $i=1; $i <= $#qtl_array; $i++) {
 		#set up bins and counters for averages and stdevs, and totals animals genotyped
 		if ($genotype_data[$i] eq "NA") {
 			$na_count = $na_count + 1;
+			$genotype_letters = "NA";
 		}
 		
 		elsif ($genotype_data[$i] == 0) {
 			$reference_total = $reference_total + $expression_data[$i];
 			$reference_counter = $reference_counter + 1;
 			push @reference_array, "$expression_data[$i]";
+			$genotype_letters = "$ref_allele$ref_allele";
 		}
 		elsif ($genotype_data[$i] == 1) {
 			$hetero_total = $hetero_total + $expression_data[$i];
 			$hetero_counter = $hetero_counter + 1;
 			push @hetero_array, "$expression_data[$i]";
+			$genotype_letters = "$ref_allele$alt_allele";
 		}
 		elsif ($genotype_data[$i] == 2) {
 			$alternate_total = $alternate_total + $expression_data[$i];
 			$alternate_counter = $alternate_counter + 1;
 			push @alternate_array, "$expression_data[$i]";
+			$genotype_letters = "$alt_allele$alt_allele";
 		}
 
 		#print data (by row) - genotype-header = pig names.
-		print $output "$genotype_header[$i]\t$genotype_data[$i]\t$expression_data[$i]\n";
+		print $output "$genotype_header[$i]\t$genotype_data[$i]\t$expression_data[$i]\t$genotype_letters\n";
 	}
 
 	#calculate averages & stdevs for diff genotypes
@@ -131,11 +142,11 @@ for (my $i=1; $i <= $#qtl_array; $i++) {
 
 	my $total_genotyped = $reference_counter + $hetero_counter + $alternate_counter;
 
-	#get the reference and alternate allele from the original VCF file
-	my @vcf_match = grep {/$qtl_fields[2]/} @vcf_array;
-	my @vcf_fields = split("\t", $vcf_match[0]);
-	my $ref_allele = $vcf_fields[3];
-	my $alt_allele = $vcf_fields[4];
+	# #get the reference and alternate allele from the original VCF file
+	# my @vcf_match = grep {/$qtl_fields[2]/} @vcf_array;
+	# my @vcf_fields = split("\t", $vcf_match[0]);
+	# my $ref_allele = $vcf_fields[3];
+	# my $alt_allele = $vcf_fields[4];
 
 
 	#set up second summary table
