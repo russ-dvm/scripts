@@ -6,7 +6,7 @@
 genome=/media/russ/data/porcine/genome/genome.custom.fa
 
 
-#My SNP filters
+#My SNP filters - individuals
 # for qd in 1.0 2.0 2.5 3.0
 # do
 # 	for mq in 30.0 40.0
@@ -34,29 +34,57 @@ genome=/media/russ/data/porcine/genome/genome.custom.fa
 
 
 #My INDEL filters
-for qd in 1.0 2.0
+# for qd in 1.0 2.0
+# do
+# 	for fs in 200.0 175.0 225.0
+# 	do
+# 		for rprs in -15.0 -20.0 -25.0
+# 		do
+# 			java -Xmx28g -jar ~/java/GATK/GenomeAnalysisTK.jar \
+# 			-T VariantFiltration \
+# 			-R "$genome" \
+# 			-V pig.indel.only.vcf \
+# 			-filter "QD < "$qd"" \
+# 			--filterName "QDFilter" \
+# 			-filter "FS > "$fs"" \
+# 			--filterName "FSFilter" \
+# 			-filter "ReadPosRankSum > "$rprs"" \
+# 			--filterName "ReadPosRankSumFilter" \
+# 			-G_filter "DP < 10" \
+# 			--genotypeFilterName "DP10" \
+# 		--setFilteredGtToNocall \
+# 			-o indel.qd"$qd".fs"$fs".vcf
+# 		done
+# 	done
+# done
+
+###########GROUP FILTERS###########
+#My SNP filters - groups
+for qd in 1.0 2.0 2.5
 do
-	for fs in 200.0 175.0 225.0
+	for mq in 30.0 40.0
 	do
-		for rprs in -15.0 -20.0 -25.0
-		do
-			java -Xmx28g -jar ~/java/GATK/GenomeAnalysisTK.jar \
-			-T VariantFiltration \
-			-R "$genome" \
-			-V pig.indel.only.vcf \
-			-filter "QD < "$qd"" \
-			--filterName "QDFilter" \
-			-filter "FS > "$fs"" \
-			--filterName "FSFilter" \
-			-filter "ReadPosRankSum > "$rprs"" \
-			--filterName "ReadPosRankSumFilter" \
-			-G_filter "DP < 10" \
-			--genotypeFilterName "DP10" \
+		java -Xmx28g -jar ~/java/GATK/GenomeAnalysisTK.jar \
+		-T VariantFiltration \
+		-R "$genome" \
+		-V group.all.snps.vcf \
+		-filter "QD < "$qd"" \
+		--filterName "QDFilter" \
+		-filter "DP > 720 ? SOR > 2.0 : FS > 40.0" \
+		--filterName "SOR-FSFilter" \
+		-filter "MQRankSum < -12.5" \
+		--filterName "MQRankSumFilter" \
+		-filter "ReadPosRankSum < -8.0" \
+		--filterName "ReadPosRankSumFilter" \
+		-filter "MQ < "$mq"" \
+		--filterName "MQFilter" \
+		-G_filter "DP < 30" \
+		--genotypeFilterName "DP30" \
 		--setFilteredGtToNocall \
-			-o indel.qd"$qd".fs"$fs".vcf
-		done
+		-o groups/qd"$qd"_mq"$mq".vcf 
 	done
 done
+
 
 #Jiao et al filters
 #java -jar /usr/local/GATK/GenomeAnalysisTK-new.jar -T VariantFiltration -R ~/genome/genome.fa -V snps.vcf -filter "DP < 445" --filterName "Depth" -filter "MQ < 20.0" --filterName "MQFilter" -o $1.vcf
