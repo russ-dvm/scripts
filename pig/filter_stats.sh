@@ -4,9 +4,9 @@
 #check if the summary table exists
 
 #default directory
-table=/media/russ/data/porcine/4_variants/filter_stats_pig_snps_again.txt
+table=/media/russ/data/porcine/4_variants/groups/group_stats.txt
 
-input=pig.snps.only.vcf
+input=group.all.snps.vcf
 
 #check if table already exists
 if [ ! -f $table ]

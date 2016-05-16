@@ -19,8 +19,8 @@ fi
 #gather stats
 echo working on it...
 total=$(grep -v \# $1 | wc -l)
-passed=$(grep -v \# $1 | grep -ci pass)
-failed=$(grep -v \# $1 | grep -vci pass)
+passed=$(grep -v \# $1 | grep -vci filter)
+failed=$(grep -v \# $1 | grep -ci filter)
 qdfilter=$(grep -v \# $1 | grep -ci qdfilter)
 mqfilter=$(grep -v \# $1 | grep -ci mqfilter)
 sortfilter=$(grep -v \# $1 | grep -ci sorfilter)

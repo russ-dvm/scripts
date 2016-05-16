@@ -7,31 +7,37 @@ genome=/media/russ/data/bovine/genome/Sequence/WholeGenomeFasta/genome.chr.fa
 
 
 #My filters
+for qd in 0.5 1.0 1.5 2.0
+do
+	for mq in 20.0 30.0 40.0
+	do
+		java -jar ~/java/GATK/GenomeAnalysisTK.jar -T VariantFiltration -R "$genome" -V snps.vcf -filter "QD < $qd" --filterName "QDFilter" -filter "DP > 890 ? SOR > 2.0 : FS > 40.0" --filterName "SOR-FSFilter" -filter "MQ < $mq" --filterName "MQFilter" -G_filter "DP < 50" --genotypeFilterName "DP50" --setFilteredGtToNocall -o qd"$qd".mq"$mq".depth50.vcf 
+	done
+done
 
-java -jar ~/java/GATK/GenomeAnalysisTK.jar -T VariantFiltration -R "$genome" -V snps.vcf -filter "QD < 0.65" --filterName "QDFilter" -filter "DP > 890 ? SOR > 2.0 : FS > 40.0" --filterName "SOR-FSFilter" -filter "MQ < 20.0" --filterName "MQFilter" -filter "DP < 600" --filterName "DepthFilter" -o $1.vcf 
 
 #Jiao et al filters
 #java -jar /usr/local/GATK/GenomeAnalysisTK-new.jar -T VariantFiltration -R ~/genome/genome.fa -V snps.vcf -filter "DP < 445" --filterName "Depth" -filter "MQ < 20.0" --filterName "MQFilter" -o $1.vcf
 
-echo .
-echo .
-echo .
-echo .
+# echo .
+# echo .
+# echo .
+# echo .
 
-java -jar ~/java/GATK/GenomeAnalysisTK.jar -R "$genome" -T VariantsToTable -V $1.vcf -F CHROM -F POS -F ID -F QUAL -F FILTER -F AC -F AF -F DP -F QD -F SOR -F FS -F MQ -F ReadPosRankSum -o $1.table --allowMissingData --showFiltered -SMA
+# java -jar ~/java/GATK/GenomeAnalysisTK.jar -R "$genome" -T VariantsToTable -V $1.vcf -F CHROM -F POS -F ID -F QUAL -F FILTER -F AC -F AF -F DP -F QD -F SOR -F FS -F MQ -F ReadPosRankSum -o $1.table --allowMissingData --showFiltered -SMA
 
-echo .
-echo .
-echo .
-echo .
+# echo .
+# echo .
+# echo .
+# echo .
 
 
-# scp $1.table Rick@131.104.118.154:~/Desktop/remote/filterTests
+# # scp $1.table Rick@131.104.118.154:~/Desktop/remote/filterTests
 
-echo .
-echo .
-echo .
-echo .
+# echo .
+# echo .
+# echo .
+# echo .
 
 
 bash filter_stats.sh $1.vcf
