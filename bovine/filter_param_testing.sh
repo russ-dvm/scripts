@@ -6,15 +6,40 @@
 genome=/media/russ/data/bovine/genome/Sequence/WholeGenomeFasta/genome.chr.fa
 
 
-#My filters
-for qd in 0.5 1.0 1.5 2.0
+# #My SNP filters
+# for qd in 0.5 1.0 1.5 2.0
+# do
+# 	for mq in 20.0 30.0 40.0
+# 	do
+# 		java -jar ~/java/GATK/GenomeAnalysisTK.jar -T VariantFiltration -R "$genome" -V snps.vcf -filter "QD < $qd" --filterName "QDFilter" -filter "DP > 890 ? SOR > 2.0 : FS > 40.0" --filterName "SOR-FSFilter" -filter "MQ < $mq" --filterName "MQFilter" -G_filter "DP < 50" --genotypeFilterName "DP50" --setFilteredGtToNocall -o qd"$qd".mq"$mq".depth50.vcf 
+# 	done
+# done
+
+
+## My INDEL filters
+for qd in 1.0 2.0
 do
-	for mq in 20.0 30.0 40.0
+	for fs in 175.0 200.0 225.0
 	do
-		java -jar ~/java/GATK/GenomeAnalysisTK.jar -T VariantFiltration -R "$genome" -V snps.vcf -filter "QD < $qd" --filterName "QDFilter" -filter "DP > 890 ? SOR > 2.0 : FS > 40.0" --filterName "SOR-FSFilter" -filter "MQ < $mq" --filterName "MQFilter" -G_filter "DP < 50" --genotypeFilterName "DP50" --setFilteredGtToNocall -o qd"$qd".mq"$mq".depth50.vcf 
+		for rprs in -15.0 -20.0 -25.0
+		do
+			java -Xmx28g -jar ~/java/GATK/GenomeAnalysisTK.jar \
+			-T VariantFiltration \
+			-R "$genome" \
+			-V $1 \
+			-filter "QD < "$qd"" \
+			--filterName "QDFilter" \
+			-filter "FS > "$fs"" \
+			--filterName "FSFilter" \
+			-filter "ReadPosRankSum > "$rprs"" \
+			--filterName "ReadPosRankSumFilter" \
+			-G_filter "DP < 50" \
+			--genotypeFilterName "DP50" \
+			--setFilteredGtToNocall \
+			-o indel.qd"$qd".fs"$fs".vcf
+		done
 	done
 done
-
 
 #Jiao et al filters
 #java -jar /usr/local/GATK/GenomeAnalysisTK-new.jar -T VariantFiltration -R ~/genome/genome.fa -V snps.vcf -filter "DP < 445" --filterName "Depth" -filter "MQ < 20.0" --filterName "MQFilter" -o $1.vcf
@@ -40,4 +65,4 @@ done
 # echo .
 
 
-bash filter_stats.sh $1.vcf
+# bash filter_stats.sh $1.vcf
