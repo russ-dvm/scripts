@@ -40,7 +40,7 @@ do
 
 
 
-# 	java -Xmx120g -jar /work/rfraser/programs/GenomeAnalysisTK.jar -T HaplotypeCaller -R $genome -ERC GVCF --genotyping_mode DISCOVERY -pcrModel CONSERVATIVE -stand_call_conf 30 -stand_emit_conf 10 -ploidy $ploidy -L $intervals -ip 100 -D $dbsnp -I $x -o ../gvcf/$base.g.vcf -bamout ../gvcf/$base.bamout.bam -maxAltAlleles 4 -log $base.log
+# 	java -Xmx120g -jar /work/rfraser/programs/GenomeAnalysisTK.jar -T HaplotypeCaller -R $genome -ERC GVCF --genotyping_mode DISCOVERY -pcrModel CONSERVATIVE -stand_call_conf 30 -stand_emit_conf 10 -ploidy $ploidy -L $intervals -ip 100 -D $dbsnp -I $x -o ../gvcf/$base.g.vcf -bamout ../gvcf/$base.bamout.bam -maxAltAlleles 4 -log $base.log -maxNumPLValues 20000 -l DEBUG
 	
 	
 	sqsub -r 3.5d -n 8 -mpp 120G -o haplotype.caller.log java -Xmx120g -jar /work/rfraser/programs/GenomeAnalysisTK.jar -T HaplotypeCaller -R $genome -ERC GVCF --genotyping_mode DISCOVERY -pcrModel CONSERVATIVE -stand_call_conf 30 -stand_emit_conf 10 -ploidy $ploidy -L $intervals -ip 100 -D $dbsnp -I $x -o ../gvcf/$base.g.vcf -bamout ../gvcf/$base.bamout.bam -maxAltAlleles 4 -log ../gvcf/$base.log

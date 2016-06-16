@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-#Ann Meyer, May 4, 2105
+#Ann Meyer, May 4, 2015
 #This script will get the allele
 #depths for the ref and alt alleles
 #at each of the SNP positions

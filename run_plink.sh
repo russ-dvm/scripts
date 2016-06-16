@@ -22,6 +22,6 @@ cat $1.temp | tr -s ' ' '\t' > $1.alleles.txt
 rm $1.temp
 echo done.
 
-echo -n Sending to remote machine...
-scp $1.alleles.txt Rick@131.104.118.154:~/Desktop/remote
-echo done.
+#echo -n Sending to remote machine...
+#scp $1.alleles.txt Rick@131.104.118.154:~/Desktop/remote
+#echo done.
