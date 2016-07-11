@@ -13,7 +13,7 @@ echo done.
 echo -n Generating VCFs with variants that are in lectins and have passed...
 
 # lectin_intervals=/home/russ/equine/2014_11_24/ref_files/lectin_intervals.intervals
-lectin_intervals=nofcn1like.intervals
+lectin_intervals=/home/russ/equine/2014_11_24/ref_files/nofcn1like.intervals
 
 java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R ~/genome/genome.fa -L "$lectin_intervals" -ef -env -V $1.snpeff.vcf -o $1.lectins.vcf
 java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R ~/genome/genome.fa -L "$lectin_intervals" -ef -env -V $1.snpeff.50kb.vcf -o $1.lectins.50kb.vcf

@@ -8,7 +8,7 @@
 library(ggplot2)
 
 #input data
-fet <- read.table("~/Desktop/fisher.txt", h=T)
+fet <- read.table("~/sandbox/allele_freq_comparison/gatk_depths/test.vcf", h=T)
 
 #set empty variable containers
 nref=NULL
@@ -78,5 +78,5 @@ plot1 <- ggplot(sorted.by.p) +
 plot1
 
 #output the data
-write.table(sorted.by.p, file="~/fisher_output/fisher-exact-test-stats.txt", row.names=F, sep="\t", quote=F)
+write.table(sorted.by.p, file="~/sandbox/allele_freq_comparison/gatk_depths/fisher-exact-test-stats.txt", row.names=F, sep="\t", quote=F)
 ggsave(plot = plot1, filename="~/fisher_output/plot1.png")

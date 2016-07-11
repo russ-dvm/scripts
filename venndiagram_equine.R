@@ -1,0 +1,1 @@
+draw.pairwise.venn(5145, 1178, 971, category=c("Experimental dataset", "dbSNP"), fill=c("firebrick", "light blue"), alpha=0.5, cat.pos=c(-20,30), cat.dist=c(0.04,0.04), cex=1.2, cat.cex=1.2, lwd=1, ext.pos=175, ext.dist=0.05)
