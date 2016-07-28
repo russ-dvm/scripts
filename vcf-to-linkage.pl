@@ -15,6 +15,8 @@ my %conversion = (
 	"." => ".",
 	);
 	
+die "\nProper usage: perl vcf-to-linkage.pl <vcf-file>. Redirect to stout file of your choice.\n\n" if @ARGV != 1;	
+	
 foreach my $vcf_line (@vcf_array) {
 	
 	chomp $vcf_line;
@@ -62,7 +64,6 @@ foreach my $vcf_line (@vcf_array) {
 			}
 
 			print "$conversion{$individual_allele_one} $conversion{$individual_allele_two}\t";
-# 			print "$individual_allele_one\t$individual_allele_two";
 
 			}
 			print "\n";
