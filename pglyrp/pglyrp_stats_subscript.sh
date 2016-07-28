@@ -21,8 +21,9 @@ then
 	echo done.
 
 else
-	for x in pglyrp1 pglyrp2 pglyrp3 pglyrp4
+	for ensembl_id in ${!gene_hash[@]}
 	do
+		x="${gene_hash[$ensembl_id]}"
 		echo -n $x...
 		bgzip $dir/$x/$1.$x.normals.$dir.snps.vcf
 		tabix -p vcf $dir/$x/$1.$x.normals.$dir.snps.vcf.gz
