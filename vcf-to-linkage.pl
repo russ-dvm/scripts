@@ -12,28 +12,75 @@ my %conversion = (
 	C => "2",
 	G => "3",
 	T => "4",
-	"." => ".",
+	"." => "0",
 	);
 	
 die "\nProper usage: perl vcf-to-linkage.pl <vcf-file>. Redirect to stout file of your choice.\n\n" if @ARGV != 1;	
 	
+
 foreach my $vcf_line (@vcf_array) {
 	
 	chomp $vcf_line;
-	
+
+	my @vcf_fields = split(/\t/, $vcf_line);
+
 	if ($vcf_line =~ /##/) {}
-	elsif ($vcf_line =~ /#CHROM/) {print "$vcf_line\n"}
+
+	#create header lines by piggy-backing of off the single occurance of #CHROM
+	elsif ($vcf_line =~ /#CHROM/) {
+
+		#family info - should be unique for every individual in our case
+		print "family\t";
+		for (my $i = 0; $i <= $#vcf_fields; $i++) {
+			print "$i\t";
+		}
+		print "\n";
+
+		#individual info - use the original #CHROM header line to obtain pigID
+		print "individual_id\t";
+		for (my $i = 9; $i <= $#vcf_fields; $i++) {
+			print "$vcf_fields[$i]\t";
+		}
+		print "\n";
+
+		#father_id - unknown, print 0 for all
+		print "father_id\t";
+		for (my $i = 0; $i <= $#vcf_fields; $i++) {
+			print "0\t";
+		}
+		print "\n";
+
+		#mother_id - unknown, print 0 for all
+		print "mother_id\t";
+		for (my $i = 0; $i <= $#vcf_fields; $i++) {
+			print "0\t";
+		}
+		print "\n";
+
+		#gender - sort of known. Does it matter? Check with BL.
+		print "gender\t";
+		for (my $i = 0; $i <= $#vcf_fields; $i++) {
+			print "1\t";
+		}
+		print "\n";
+
+		#disease status - sort of known. Does it matter? Check with BL.
+		print "status\t";
+		for (my $i = 0; $i <= $#vcf_fields; $i++) {
+			print "1\t";
+		}
+		print "\n";
+	}
+
 	else {
 	
-		my @vcf_fields = split(/\t/, $vcf_line);
 		
 		my $ref_allele = $vcf_fields[3];
 		my $alt_allele = $vcf_fields[4];
 		
 		print "$vcf_fields[0].$vcf_fields[1].$vcf_fields[2]\t";
 
-		
-		for (my $i = 9; $i < $#vcf_fields; $i++){
+		for (my $i = 9; $i <= $#vcf_fields; $i++){
 		
 			my @individual_fields = split(/\:/, $vcf_fields[$i]);
 			my @individual_genotype = split(/\//, $individual_fields[0]);
@@ -65,8 +112,10 @@ foreach my $vcf_line (@vcf_array) {
 
 			print "$conversion{$individual_allele_one} $conversion{$individual_allele_two}\t";
 
-			}
-			print "\n";
 		}
+
+		print "\n";
+
 	}
+}
 		
