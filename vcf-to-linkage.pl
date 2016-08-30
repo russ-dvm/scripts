@@ -4,7 +4,10 @@ use strict;
 use warnings;
 
 open (my $vcf, "<", $ARGV[0]);
-
+my $ped = "$ARGV[1].ped";
+my $info = "$ARGV[1].info";
+open (my $ped_output, ">", $ped);
+open (my $info_output, ">", $info);
 my @vcf_array = <$vcf>;
 
 my %conversion = (
@@ -15,7 +18,7 @@ my %conversion = (
 	"." => "0",
 	);
 	
-die "\nProper usage: perl vcf-to-linkage.pl <vcf-file>. Redirect to stout file of your choice.\n\n" if @ARGV != 1;	
+die "\nProper usage: perl vcf-to-linkage.pl <vcf-file> <base-name-of-output>. Redirect to stout file of your choice.\n\n" if @ARGV != 2;	
 	
 
 foreach my $vcf_line (@vcf_array) {
@@ -30,46 +33,46 @@ foreach my $vcf_line (@vcf_array) {
 	elsif ($vcf_line =~ /#CHROM/) {
 
 		#family info - should be unique for every individual in our case
-		print "family\t";
+		# print "family\t";
 		for (my $i = 0; $i <= $#vcf_fields; $i++) {
-			print "$i\t";
+			print $ped_output "$i\t";
 		}
-		print "\n";
+		print $ped_output "\n";
 
 		#individual info - use the original #CHROM header line to obtain pigID
-		print "individual_id\t";
+		# print "individual_id\t";
 		for (my $i = 9; $i <= $#vcf_fields; $i++) {
-			print "$vcf_fields[$i]\t";
+			print $ped_output "$vcf_fields[$i]\t";
 		}
-		print "\n";
+		print $ped_output "\n";
 
 		#father_id - unknown, print 0 for all
-		print "father_id\t";
+		# print "father_id\t";
 		for (my $i = 0; $i <= $#vcf_fields; $i++) {
-			print "0\t";
+			print $ped_output "0\t";
 		}
-		print "\n";
+		print $ped_output "\n";
 
 		#mother_id - unknown, print 0 for all
-		print "mother_id\t";
+		# print "mother_id\t";
 		for (my $i = 0; $i <= $#vcf_fields; $i++) {
-			print "0\t";
+			print $ped_output "0\t";
 		}
-		print "\n";
+		print $ped_output "\n";
 
 		#gender - sort of known. Does it matter? Check with BL.
-		print "gender\t";
+		# print "gender\t";
 		for (my $i = 0; $i <= $#vcf_fields; $i++) {
-			print "1\t";
+			print $ped_output "1\t";
 		}
-		print "\n";
+		print $ped_output "\n";
 
 		#disease status - sort of known. Does it matter? Check with BL.
-		print "status\t";
+		# print "status\t";
 		for (my $i = 0; $i <= $#vcf_fields; $i++) {
-			print "1\t";
+			print $ped_output "1\t";
 		}
-		print "\n";
+		print $ped_output "\n";
 	}
 
 	else {
@@ -78,7 +81,8 @@ foreach my $vcf_line (@vcf_array) {
 		my $ref_allele = $vcf_fields[3];
 		my $alt_allele = $vcf_fields[4];
 		
-		print "$vcf_fields[0].$vcf_fields[1].$vcf_fields[2]\t";
+		#print info
+		print $info_output "$vcf_fields[2]\t$vcf_fields[1]\n";
 
 		for (my $i = 9; $i <= $#vcf_fields; $i++){
 		
@@ -110,7 +114,7 @@ foreach my $vcf_line (@vcf_array) {
 				$individual_allele_two = $alt_allele;
 			}
 
-			print "$conversion{$individual_allele_one} $conversion{$individual_allele_two}\t";
+			print $ped_output "$conversion{$individual_allele_one} $conversion{$individual_allele_two}\t";
 
 		}
 
