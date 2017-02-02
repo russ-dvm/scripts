@@ -15,7 +15,11 @@ for i in range(1, len(lines)):
         print(line_fields[2],"double", "blank", "blank", sep = "\t", end = "\n")
         print("")
         print("")
-    elif i % 8 != 0:
+    elif i % 12 != 0:
         print(line_fields[2], end="\t")
-    elif i % 8 == 0:
+    elif i % 12 == 0:
         print(line_fields[2])
+        # print("")
+        # print("")
+        # print("")
+        # print("")
