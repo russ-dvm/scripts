@@ -1,5 +1,6 @@
 library(ggplot2)
-
+library(viridis)
+library(ggforce)
 #BOVINE
 #popoolation <- read.table("~/bovine/merged_runs/popoolation/subsampled200-no-na.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
 
@@ -64,7 +65,7 @@ sorted.by.p$Chromosome <- factor(sorted.by.p$Chromosome, levels = c("chr1", "chr
 
 
 
-plot1 <- ggplot(sorted.by.p) + geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.5) + geom_hline(yintercept=intercept, col="red") + theme_classic() +  xlab("")+ ylab("-log(p)")+ theme(legend.position="none") + expand_limits(y=c(0,6)) + scale_colour_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue")) + theme(axis.text.x=element_text(angle = 45, hjust=1), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15)) 
+plot1 <- ggplot(sorted.by.p) + geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.5) + geom_hline(yintercept=intercept, col="red") + theme_classic() +  xlab("")+ ylab("-log(p)")+ theme(legend.position="none") + expand_limits(y=c(0,6)) + scale_colour_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue")) + theme(axis.text.x=element_text(angle = 45, hjust=1), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15))
 plot1
 
 sig_only <- subset(sorted.by.p, sorted.by.p$significant == "TRUE")
@@ -92,3 +93,12 @@ write.table(sig_only, file = "~/Desktop/sig-only200.txt", quote = F, sep = "\t",
 # 
 # hist(sorted.by.p$invlogp)
 # hist(sorted.by.p$actual.p)
+
+#######################
+###ZOOM IN ON REGION###
+#######################
+
+ggplot(sorted.by.p) + geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.49)+facet_zoom(x=Chromosome=='chr10') + theme_bw() + xlab("") + ylab('Inv log (P)') + theme(legend.position="none") + scale_color_viridis(discrete=T)
+
+
++ geom_hline(yintercept=intercept, col="red") + theme_classic() +  xlab("")+ ylab("-log(p)")+ theme(legend.position="none") + expand_limits(y=c(0,6)) + 
