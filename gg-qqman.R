@@ -98,7 +98,8 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
   xmax = ceiling(max(d$pos) * 1.03)
   xmin = floor(max(d$pos) * -0.03)
   
-  #Direct ticks and labels into their own values and return the data frame - ggplot addition at end (outside the function)
+  ###MODIFIED HERE -- Direct ticks and labels into their own values and return the data frame 
+  ## The datafrmae (d) can then be used in ggplot along with the ticks and labels
   assign('ticks', ticks, envir=.GlobalEnv)
   assign('labs',labs, envir= .GlobalEnv)
   return(d)
