@@ -1,5 +1,8 @@
-library(reshape)
+library(reshape2)
 library(ggplot2)
+library(tidyr)
+library(psych)
+library(plyr)
 
 ###IMPORT REF GENE (GAPDH)
 gapdh <- read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/gapdh.txt", h=T)
@@ -7,72 +10,45 @@ gapdh <- melt(gapdh)
 
 
 ###IMPORT HAPTOGLOBIN -- multiple probes. Disentangle.
-x = read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/haptoglobin.txt", h = T)
-
-y <- melt(x)
-
-y <- y[order(y["value"], decreasing = T), ]
+hp_raw = read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/haptoglobin.txt", h = T)
+hp_raw_melt <- melt(hp_raw)
+hp_raw_melt <- hp_raw_melt[order(hp_raw_melt["value"], decreasing = T), ]
 z <- y
 z$rank <- c(1:nrow(y))
-#ggplot(z, aes(x = variable, y = value)) + geom_boxplot() + theme_classic() + xlab("") 
-z
+
+#Check to see if all probes correlate well.
+check <- spread(hp_raw_melt, probe, value)
+corr.test(check[2:6])
+###probe 667554 is an outlier.
+
 #subset based on probe
-p1 <- subset(y, y$probe == "A_72_P178006")
-p2 <- subset(y, y$probe == "A_72_P568194")
-p3 <- subset(y, y$probe == "A_72_P581127")
-p4 <- subset(y, y$probe == "A_72_P657000")
-p5 <- subset(y, y$probe == "A_72_P667554")
-  
-#define "order" based on the rank of P1.
-p1_sorted <- p1[order(p1["value"]),]
-p1_sorted$rank <- c(1:nrow(p1_sorted))
-p1_sorted
-p1 <- p1_sorted[order(p1_sorted["variable"]),]
-default_rank <- p1$rank
+p1 <- subset(hp_raw_melt, hp_raw_melt$probe == "A_72_P178006")
+p2 <- subset(hp_raw_melt, hp_raw_melt$probe == "A_72_P568194")
+p3 <- subset(hp_raw_melt, hp_raw_melt$probe == "A_72_P581127")
+p4 <- subset(hp_raw_melt, hp_raw_melt$probe == "A_72_P657000")
+p5 <- subset(hp_raw_melt, hp_raw_melt$probe == "A_72_P667554")
 
-#sort by pig # and then give rank
-p2 <- p2[order(p2["variable"]),]
-p2$rank <- default_rank
+hp_list <- list(p1, p2, p3, p4)
 
-p3 <- p3[order(p3["variable"]),]
-p3$rank <- default_rank
+##Normalize the value for each probe
 
-p4 <- p4[order(p4["variable"]),]
-p4$rank <- default_rank
-
-p5 <- p5[order(p5["variable"]),]
-p5$rank <- default_rank
+hp_list_normalized <- lapply(hp_list, merge, gapdh, by.x = "variable", by.y='variable')
+hp_list_normalized <- lapply(hp_list_normalized, function(z) {z$norm <- z$value.x - z$value.y; z})
 
 
-complete <- rbind(p1, p2, p3, p4, p5)
-
-#all data for haptoglobin
-#ggplot(complete) + geom_point(aes(x=rank, y=value)) + facet_grid(.~probe) + ggtitle("all probes, all pigs")
-
-#drop the lowest two
-#ggplot(subset(complete, rank != 1 & rank != 2)) + geom_point(aes(x=rank, y=value)) + facet_grid(.~probe) + ggtitle("all probes, bottom 2 pigs removed")
+# complete <- rbind(p1, p2, p3, p4, p5)
+complete <- ldply(hp_list_normalized, rbind)
 
 #average the five probes
 avg <- data.frame(Pig = as.character(), value=as.integer())
-total = 0
-for (i in 1:nrow(p1)){
-  rank <- subset(complete, rank==i)
-  avg <- rbind(avg, c(rank$variable[1], as.numeric(mean(rank$value))))
+
+#Because all the probes and pigs have their normalized values at this stage, you can choose between averaging the original values, or averaging the gapdh normalized values. "value.x" == the original values; "norm" == gapdh normalized. BL and I did some napkin math and decided that there was no difference between the avg(normalized values) and (avg(original values) - gapdh). 
+for (i in 1:length(unique(complete$variable))){
+  rank <- subset(complete, variable==paste("X", i, sep=""))
+  avg <- rbind(avg, c(rank$variable[1], as.numeric(mean(rank$value.x))))
   }
 
-#avg <- avg[order(avg[,2]),]
-#avg$rank <- c(1:nrow(avg))
-
-#ggplot(avg, aes(x=rank, y=avg[,2])) + geom_point() + ggtitle("average of all 5 probes, all pigs")
-
-#avg_no_out <- subset(avg, rank != 1 & rank != 2)
-#ggplot(avg_no_out) + geom_point(aes(x=rank, y=avg_no_out[,2]), shape=5)+ ggtitle("average of all 5 probes, bottom 2 pigs removed")
-
-###2x2
-#pub <- rbind(p1, p2, p3, p4)
-#ggplot(pub, aes(x=rank, y=value)) + geom_point() + facet_wrap(~probe, scales="free") + theme_bw() + ylab("GAPDH") + xlab("Pig ID")
-
-##
+##MAIN HP TABLE
 avg$Gene <- "HP"
 colnames(avg) <- c("variable", "value", "Gene")
 hp_sorted <- data.frame(Gene=avg$Gene, variable = avg$variable, value = avg$value)
@@ -85,9 +61,12 @@ hp_merged <- hp_merged[order(hp_merged$normalized),]
 hp_merged$rank <- c(1:nrow(hp_merged))
 colnames(hp_merged) <- c("Pig", "Gene", "orig_value", "GAPDH", "normalized", "rank")
 
+##A lot of time was spent trying to reconcile differences between my graphs and Hein Snyman's original graphs in his thesis. After considerable digging and troubleshooting, looks like the HP graph was not normalized to GAPDH. Here is a version of an un-normalized HP graph for comparison. 
+hein_style_hp <- hp_merged[order(hp_merged$orig_value),]
+hein_style_hp$rank <- c(1:nrow(hein_style_hp))
+ggplot(hein_style_hp, aes(x=rank, y=orig_value)) + geom_point()
 
 ####IMPORT MBL2 & NLRP5
-
 mbl2_raw <- read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/mbl2.txt", h=T)
 mbl2_melted <- melt(mbl2_raw)
 mbl2_merged <- merge(mbl2_melted, gapdh, by = "variable", suffix = c(".MBL2", ".GAPDH"))
@@ -108,7 +87,6 @@ nlrp5_merged$rank <- c(1:nrow(nlrp5_merged))
 colnames(nlrp5_merged) <- c("Pig", "Gene", "orig_value", "GAPDH", "normalized", "rank")
 
 ##HAMP
-
 hamp_raw <- read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/hamp.txt", h=T)
 hamp_melted <- melt(hamp_raw)
 hamp_avg <- data.frame(Gene=character(), animal=factor(), value=numeric())
@@ -153,19 +131,35 @@ ddx_merged <- ddx_merged[order(ddx_merged["normalized"]),]
 ddx_merged$rank <- c(1:nrow(ddx_merged))
 ddx_merged1 <- data.frame(Pig = ddx_merged$variable, Gene = ddx_merged$Gene.DDX58, orig_value = ddx_merged$value.DDX58, GAPDH = ddx_merged$value.GAPDH, normalized = ddx_merged$normalized, rank = ddx_merged$rank)
 
-
 ####COMBINE INTO A MASTER DATA FRAME
 master <- rbind(hamp_merged1, hp_merged, ddx_merged1, nlrp5_merged)
 
-##remove piggies - outliers.
+##remove outlier piggies: X33 = 357, X74 = 812
 master_trimmed <- subset(master, master$Pig != "X33")
 master_trimmed <- subset(master_trimmed, master_trimmed$Pig != "X74")
 
-##ALL PIGS
-ggplot(master, aes(x=rank, y=normalized)) + geom_point(shape = 18, size=3) + facet_wrap(~Gene) + theme_bw() + ylab(bquote('Gene expression relative to GAPDH ('~log[2]~')')) + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), strip.text = element_text(face = "italic"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + geom_line() + scale_y_continuous(breaks=seq(-10,10,1)) + geom_hline(yintercept = 0)
+##ALL PIGS (OUTLIERS PRESENT)
+ggplot(master, aes(x=rank, y=normalized)) + 
+  geom_point(shape = 18, size=3) + 
+  facet_wrap(~Gene) + theme_bw() + 
+  ylab(bquote('Gene expression relative to GAPDH ('~log[2]~')')) + 
+  xlab("") + 
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), strip.text = element_text(face = "italic"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + 
+  geom_line() + 
+  scale_y_continuous(breaks=seq(-10,10,1)) + 
+  geom_hline(yintercept = 0)
 
 ##FOR PLOTTING INDIVIDUAL GENES
-#ggplot(hamp_sorted, aes(x=rank, y=value)) + geom_point(shape = 18, size=3) + facet_wrap(~Gene) + theme_bw() + ylab(bquote('Gene expression relative to GAPDH ('~log[2]~')')) + xlab("") + theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), strip.text = element_text(face = "italic"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + geom_line() + scale_y_continuous(breaks=seq(-10,10,1)) + geom_hline(yintercept = 0)
+# ggplot(hamp_sorted, aes(x=rank, y=value)) + 
+#   geom_point(shape = 18, size=3) + 
+#   facet_wrap(~Gene) + 
+#   theme_bw() + 
+#   ylab(bquote('Gene expression relative to GAPDH ('~log[2]~')')) + 
+#   xlab("") + 
+#   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), strip.text = element_text(face = "italic"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + 
+#   geom_line() + 
+#   scale_y_continuous(breaks=seq(-10,10,1)) + 
+#   geom_hline(yintercept = 0)
 
 ## ALL OF THE GENES, OUTLIERS REMOVED. 
 ggplot(master_trimmed, aes(x=rank, y=normalized)) + 
@@ -179,5 +173,4 @@ ggplot(master_trimmed, aes(x=rank, y=normalized)) +
   geom_line() + 
   scale_y_continuous(breaks=seq(-10,10,1)) + 
   geom_hline(yintercept=0) #+
-  #theme(strip.background = element_rect(colour="black", fill="light grey"))
 
