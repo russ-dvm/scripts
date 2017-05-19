@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-#R.Fraser, rfrase03@uoguelph.ca, 2016/02/05. 
+#R.Fraser, rfrase03@uoguelph.ca, 2016/02/05.
 #Takes input from Promo3, isolates factors with a predicted RE (query) value of less than a prompted value, and then outputs in either list or bed format.
 
 #add a quick comment.
@@ -19,7 +19,7 @@ die "\nImproper usage.\n\nTry: perl <script> <input_file_from_promo> <output>\n\
 	# my $format = "bed";
 	# my $cutoff = 100;
 	# my ($tf_file, $output);
-	# 
+	#
 	# GetOptions(
 	# 	"format=s" => \$format,
 	# 	"cutoff=i" => \$cutoff,
@@ -30,56 +30,56 @@ die "\nImproper usage.\n\nTry: perl <script> <input_file_from_promo> <output>\n\
 	# Required:
 	# \t --input\tInput file from Promo3
 	# \t --output\tOutput file
-	# 
+	#
 	# Options:
 	# \t--format\tSpecify if you want in list or bed format
 	# \t\t\t(Default: bed)
 	# \t--cutoff\tSpecify the cutoff value of RE
 	# \t\t\t(Default: 100)\n\n");
-	# 
-	
+	#
+
 
 # print "Format (list or bed)?: ";
 # my $format = <STDIN>;
 # chomp $format;
-# 
+#
 # print "Minimum length of TF sequence?: ";
 # my $cutoff = <STDIN>;
 # chomp $cutoff;
 
 # if (($format eq "list") or ($format eq "bed")) {
 	while (my $line = <$tf_file>) {
-	
-	
-		chomp $line;	
+
+
+		chomp $line;
 		my @field = split(";", $line);
-	
+
 		if ($line =~ /chromo/) {
-	
+
 			my @genome_info = split(":", $field[0]);
 				my $chrom = $genome_info[2];
 				my $start_pos = $genome_info[3];
 				my $end_pos = $genome_info[4];
 				my $direction = $genome_info[5];
-	
-			my $trans_factor = $field[1];	
-	
+
+			my $trans_factor = $field[1];
+
 			my $trans_factor_start = $field[2];
 				$trans_factor_start =~ s/^\s+//;
 			my $trans_factor_end = $field[3];
 				$trans_factor_end =~ s/^\s+//;
 			my $trans_factor_seq = $field[5];
 				$trans_factor_seq =~ s/^\s+//;
-					
+
 			my $tf_seq_length = length($trans_factor_seq);
-		
+
 			my $re_query = $field[7];
-			
 
 
-			if ($tf_seq_length >= 4){
+
+			if ($tf_seq_length >= 3){
 				my ($genome_start, $genome_end);
-				if ($direction > 0) {			
+				if ($direction > 0) {
 					$genome_start = "$start_pos" + "$trans_factor_start";
 					$genome_end = "$start_pos" + "$trans_factor_end";
 				}
@@ -87,7 +87,7 @@ die "\nImproper usage.\n\nTry: perl <script> <input_file_from_promo> <output>\n\
 					$genome_start = "$end_pos" - "$trans_factor_end";
 					$genome_end = "$end_pos" - "$trans_factor_start";
 				}
-# 				list format		
+# 				list format
 # 				if ($format eq "list") {
 # 					print $output "$chrom:$genome_start-$genome_end\t$trans_factor | $trans_factor_seq |$re_query\n";
 # 				}

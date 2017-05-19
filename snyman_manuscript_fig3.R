@@ -8,7 +8,7 @@ library(ggplot2)
 gender <- read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/gender.txt", h=T)
 gapdh <- read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/gapdh.txt", h=T)
 
-##MERGE DATAFRAMES AND CLEAN UP
+##MERGE DATAFRAMES AND CLEAN UP -- note, next time use tidyr - easier. 
 colnames(gender) <- c("pig_id", "gender", "DDX3Y")
 gender$variable <- paste("X", c(1:88), sep="")
 gapdh <- melt(gapdh)
@@ -23,8 +23,8 @@ gender_merged$rank <- c(1:nrow(gender_merged))
 colnames(gender_merged)[3] <- "Gender"
 
 ##REMOVE OUTLIERS
-## PIG 33 == 352; pig 74 == 812
-gender_merged <- subset(gender_merged, gender_merged$pig_id != 352)
+## PIG 33 == 357; pig 74 == 812
+gender_merged <- subset(gender_merged, gender_merged$pig_id != 357)
 gender_merged <- subset(gender_merged, gender_merged$pig_id != 812)
 
 ##PLOT

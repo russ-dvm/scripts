@@ -5,9 +5,9 @@
 
 #default directory
 ##PIG
-# table=/media/russ/data/porcine/4_variants/filter_stats.txt
+table=/media/russ/data/porcine/4_variants/groups/filter_stats.txt
 ##COW
-table=/media/russ/data/bovine/merged_runs/5_filter_testing/indel/filter_stats.txt
+# table=/media/russ/data/bovine/merged_runs/5_filter_testing/indel/filter_stats.txt
 
 #check if table already exists
 if [ ! -f $table ]

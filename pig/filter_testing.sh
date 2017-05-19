@@ -48,11 +48,11 @@ genome=/media/russ/data/porcine/genome/genome.custom.fa
 # 			--filterName "QDFilter" \
 # 			-filter "FS > "$fs"" \
 # 			--filterName "FSFilter" \
-# 			-filter "ReadPosRankSum > "$rprs"" \
+# 			-filter "ReadPosRankSum < "$rprs"" \
 # 			--filterName "ReadPosRankSumFilter" \
 # 			-G_filter "DP < 10" \
 # 			--genotypeFilterName "DP10" \
-# 		--setFilteredGtToNocall \
+# 			--setFilteredGtToNocall \
 # 			-o indel.qd"$qd".fs"$fs".vcf
 # 		done
 # 	done
@@ -64,24 +64,29 @@ for qd in 1.0 2.0 2.5
 do
 	for mq in 30.0 40.0
 	do
-		java -Xmx28g -jar ~/java/GATK/GenomeAnalysisTK.jar \
-		-T VariantFiltration \
-		-R "$genome" \
-		-V group.all.snps.vcf \
-		-filter "QD < "$qd"" \
-		--filterName "QDFilter" \
-		-filter "DP > 720 ? SOR > 2.0 : FS > 40.0" \
-		--filterName "SOR-FSFilter" \
-		-filter "MQRankSum < -12.5" \
-		--filterName "MQRankSumFilter" \
-		-filter "ReadPosRankSum < -8.0" \
-		--filterName "ReadPosRankSumFilter" \
-		-filter "MQ < "$mq"" \
-		--filterName "MQFilter" \
-		-G_filter "DP < 30" \
-		--genotypeFilterName "DP30" \
-		--setFilteredGtToNocall \
-		-o groups/qd"$qd"_mq"$mq".vcf 
+		for gq in 20 30
+		do
+			java -Xmx28g -jar ~/java/GATK/GenomeAnalysisTK.jar \
+			-T VariantFiltration \
+			-R "$genome" \
+			-V $1 \
+			-filter "QD < "$qd"" \
+			--filterName "QDFilter" \
+			-filter "DP > 720 ? SOR > 2.0 : FS > 40.0" \
+			--filterName "SOR-FSFilter" \
+			-filter "MQRankSum < -12.5" \
+			--filterName "MQRankSumFilter" \
+			-filter "ReadPosRankSum < -8.0" \
+			--filterName "ReadPosRankSumFilter" \
+			-filter "MQ < "$mq"" \
+			--filterName "MQFilter" \
+			-G_filter "DP < 30" \
+			--genotypeFilterName "DP30" \
+			-G_filter "GQ < "$gq"" \
+			--genotypeFilterName "GQ30" \
+			--setFilteredGtToNocall \
+			-o qd"$qd"_mq"$mq"_gq"$gq".vcf 
+		done
 	done
 done
 

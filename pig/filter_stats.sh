@@ -8,6 +8,7 @@ table=/media/russ/data/porcine/4_variants/groups/group_stats.txt
 
 input=group.all.snps.vcf
 
+echo Starting - creating files, determinign preliminary info...
 #check if table already exists
 if [ ! -f $table ]
 then

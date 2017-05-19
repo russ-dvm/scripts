@@ -51,14 +51,14 @@ foreach my $vcf_line (@vcf_array) {
 			my $field_count = @vcf_fields;
 
 			my @match_fields = split(/\t/, $unique_match[0]);
-			my @fet = split(/=/, $match_fields[5]);
-
+#			my @fet = split(/=/, $match_fields[5]);
+			my $fet = $match_fields[6];
 			for (my $i=0; $i<=$field_count; $i++) {
 				print "$vcf_fields[$i]\t";
 			}
 
-			print "$fet[1]";
-
+#			print "$fet[1]";
+			print "$fet";
 			print "\n";
 		}
 }

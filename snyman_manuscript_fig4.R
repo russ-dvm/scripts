@@ -1,3 +1,7 @@
+library(ggplot2)
+library(reshape2)
+library(viridis)
+
 #####MBL2 PLOT######
 gapdh <- read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/gapdh.txt", h=T)
 gapdh <- melt(gapdh)
@@ -12,7 +16,7 @@ mbl2_merged$rank <- c(1:nrow(mbl2_merged))
 
 
 ##REMOVE OUTLIER PIGGIES
-mbl2_merged <- subset(mbl2_merged, mbl2_merged$pig_id != 352)
+mbl2_merged <- subset(mbl2_merged, mbl2_merged$pig_id != 357)
 mbl2_merged <- subset(mbl2_merged, mbl2_merged$pig_id != 812)
 
 colnames(mbl2_merged)[5] <- "Haplotype"
