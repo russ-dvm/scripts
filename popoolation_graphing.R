@@ -98,7 +98,8 @@ write.table(sig_only, file = "~/Desktop/sig-only200.txt", quote = F, sep = "\t",
 ###ZOOM IN ON REGION###
 #######################
 
-ggplot(sorted.by.p) + geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.49)+facet_zoom(x=Chromosome=='chr10') + theme_bw() + xlab("") + ylab('Inv log (P)') + theme(legend.position="none") + scale_color_viridis(discrete=T)
+ggplot(sorted.by.p) + geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.49) + facet_zoom(x=Chromosome=='chr10') + theme_bw() + xlab("") + ylab('Inv log (P)') + theme(legend.position="none") + scale_color_viridis(discrete=T)
 
 
 + geom_hline(yintercept=intercept, col="red") + theme_classic() +  xlab("")+ ylab("-log(p)")+ theme(legend.position="none") + expand_limits(y=c(0,6)) + 
+  
