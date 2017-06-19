@@ -1,3 +1,5 @@
+#RS Fraser
+
 library(ggplot2)
 library(reshape2)
 library(viridis)
@@ -30,8 +32,9 @@ ggplot(mbl2_merged, aes(x=rank, y=normalized)) +
   xlab("") + 
   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.ticks.y = element_line(colour="light grey"), strip.text = element_text(face = "italic"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + scale_y_continuous(breaks=seq(-11,10,1)) + 
   geom_hline(yintercept=0) + 
-  ylab(bquote('Gene expression relative to GAPDH ('~log[2]~')')) + 
-  scale_shape_manual(values=c(15,16,17,18,19,24)) + scale_color_viridis(discrete = T) + 
+  ylab(expression(paste(italic("MBL2 "), "expression relative to", italic(" GAPDH "), '('~log[2]~')'))) + 
+  scale_shape_manual(values=c(15,16,17,18,19,24)) + 
+  scale_color_viridis(discrete = T) 
   ggtitle("MBL2") + 
   theme(plot.title = element_text(hjust = 0.5))
 
@@ -43,7 +46,7 @@ ggplot(mbl2_merged, aes(x=rank, y=normalized)) +
   xlab("") + 
   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.ticks.y = element_line(colour="light grey"), strip.text = element_text(face = "italic"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + scale_y_continuous(breaks=seq(-11,10,1)) + 
   geom_hline(yintercept=0) + 
-  ylab(bquote('Gene expression relative to GAPDH ('~log[2]~')')) + 
+  ylab(expression(paste(italic("MBL2 "), "expression relative to", italic(" GAPDH "), '('~log[2]~')'))) + 
   scale_shape_manual(values=c(0,1,2,3,4,5))
 
 

@@ -1,6 +1,7 @@
-##FIGURES: Sex-linked DDX3Y & MBL2 HAPLOTYPES
+#RS Fraser
+##FIGURE 3: Sex-linked DDX3Y
 
-library(reshape)
+library(reshape2)
 library(ggplot2)
 
 
@@ -29,11 +30,12 @@ gender_merged <- subset(gender_merged, gender_merged$pig_id != 812)
 
 ##PLOT
 ggplot(gender_merged, aes(x=rank, y=normalized)) + 
+  geom_hline(yintercept=0) + 
   geom_line(colour="light grey") + 
   geom_point(aes(colour = Gender, shape=Gender), size = 2.5) + 
-  theme_bw() + theme() + xlab("") + 
-  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.ticks.y = element_line(colour="light grey"), strip.text = element_text(face = "italic"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + 
-  scale_y_continuous(breaks=seq(-11,10,1)) + geom_hline(yintercept=0) + 
-  ylab(bquote('Gene expression relative to GAPDH ('~log[2]~')')) + 
-  scale_color_viridis(discrete=T)
-
+  theme_bw() + 
+  xlab("") + 
+  theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.ticks.y = element_line(colour="light grey"), strip.text = element_text(face = "italic"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank(), legend.justification = c(1,0), legend.position = c(0.97,0.65)) + 
+  scale_y_continuous(breaks=seq(-11,10,1)) + 
+  ylab(expression(paste(italic("DDX3Y "), "expression relative to", italic(" GAPDH "), '('~log[2]~')'))) +
+  scale_color_manual(values =c("grey35", "grey71"))

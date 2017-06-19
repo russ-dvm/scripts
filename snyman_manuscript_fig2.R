@@ -1,8 +1,11 @@
+#RS Fraser
+
 library(reshape2)
 library(ggplot2)
 library(tidyr)
 library(psych)
 library(plyr)
+
 
 ###IMPORT REF GENE (GAPDH)
 gapdh <- read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/gapdh.txt", h=T)
@@ -162,15 +165,17 @@ ggplot(master, aes(x=rank, y=normalized)) +
 #   geom_hline(yintercept = 0)
 
 ## ALL OF THE GENES, OUTLIERS REMOVED. 
-ggplot(master_trimmed, aes(x=rank, y=normalized)) + 
+a <- ggplot(master_trimmed, aes(x=rank, y=normalized)) + 
   geom_point(shape = 18, size=3) + 
   facet_wrap(~Gene) + 
   theme_bw() + 
-  ylab(bquote('Gene expression relative to GAPDH ('~log[2]~')')) + 
+  ylab(expression(paste("Gene expression relative to", italic(" GAPDH "), '('~log[2]~')'))) +
   xlab("") + 
   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.ticks.y = element_line(colour="light grey"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + 
-  theme(strip.text = element_text(size=12, face = "italic")) +
+  theme(strip.text = element_text(size=12, face = "italic"), text = element_text(size=12)) +
   geom_line() + 
   scale_y_continuous(breaks=seq(-10,10,1)) + 
   geom_hline(yintercept=0) #+
+a
+ggsave(a, file="~/Desktop/Fig2.tiff", width = 174, height = 174, units = "mm", dpi = 600 )
 
