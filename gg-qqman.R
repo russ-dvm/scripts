@@ -168,7 +168,7 @@ d.real <- subset(d, d$SNP != 'hide')
 
 ggplot(d) + geom_point(aes(x=pos, y=logp, color=CHR)) + theme_classic()+ ylab("-log(p)") + theme(axis.text.x=element_text(angle = 60, hjust=1, size=9), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15), legend.position = "none") + scale_color_viridis(discrete=T) + geom_hline(yintercept=-log10(intercept), colour="red") + facet_zoom(x=CHR==1)+ facet_zoom(x=CHR==1 & BP > 88892979 & BP < 89006643) + scale_x_continuous(breaks=c(ticks), labels=labs)
 
-ggsave("~/Dropbox/chrom.svg")
+# ggsave("~/Dropbox/chrom.svg")
 
 # x=CHR==1 & BP > 88892979 & BP < 89006643
 # x=CHR==8 & BP > 40893025 & BP < 41121736
