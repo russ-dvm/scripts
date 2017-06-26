@@ -71,12 +71,13 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
     #d$pos=d$BP/1e6
     d$pos=d$BP
     ticks=floor(length(d$pos))/2+1
-    minor_ticks=floor(length(d$pos))/2+1
+    minor_ticks = floor(length(d$pos))/2+1
     xlabel = paste('Chromosome',unique(d$CHR),'position')
     labs = ticks
   } else { ## For multiple chromosomes
     lastbase=0
     ticks=NULL
+    minor_ticks=NULL
     for (i in unique(d$index)) {
       if (i==1) {
         d[d$index==i, ]$pos=d[d$index==i, ]$BP
@@ -105,7 +106,7 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
   ###MODIFIED HERE -- Direct ticks and labels into their own values and return the data frame 
   ## The datafrmae (d) can then be used in ggplot along with the ticks and labels
   assign('ticks', ticks, envir=.GlobalEnv)
-  assign('labs',labs, envir= .GlobalEnv)
+  assign('labs', labs, envir= .GlobalEnv)
   assign('minor_ticks', minor_ticks, envir= .GlobalEnv)
   return(d)
   
@@ -184,9 +185,6 @@ ggplot(d) +
   theme(strip.background = element_rect(fill="grey88"))
 
 # ggsave("~/Dropbox/chrom.svg")
-
-# x=CHR==1 & BP > 88892979 & BP < 89006643
-# x=CHR==8 & BP > 40893025 & BP < 41121736
 
 #scale_color_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange"))
 
