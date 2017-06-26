@@ -84,15 +84,14 @@ a
 b <- summarize(annotation_info, sifted, 445)
 b
 
+a_low <- summarize(annotation_info, annotated_depth, 10)
+a_low
 
-write.table(b, file="~/Desktop/table.txt", sep="\t", row.names = F, quote = F)
+#Careful with subseting, the totals are NO LONGER ACCURATE!
+colec <- subset(a, a$Gene != "PGLYRP1a" & a$Gene != "PGLYRP1b" & a$Gene != "PGLYRP1x" & a$Gene != "PGLYRP2" & a$Gene != "PGLYRP3" & a$Gene != "PGLYRP4")
+pglyrp <- subset(a, a$Gene == "PGLYRP1a" | a$Gene == "PGLYRP1b" | a$Gene == "PGLYRP1x" | a$Gene == "PGLYRP2" | a$Gene == "PGLYRP3" | a$Gene == "PGLYRP4")
 
-ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6), stat="identity") + geom_bar(aes(y=Sequenced), stat="identity") + theme(axis.text.x = element_text(angle=90))
-str(a)
 
-ggplot(b, aes(x=Region)) + geom_boxplot(aes(y=Rate)) + ylim(c(0,0.05))
-ggplot(b, aes(x=Region, y=Rate, group=Gene)) + geom_bar(aes(fill = Gene), stat="identity", position="dodge") + theme(axis.text.x = element_text(angle=90)) + scale_colour_viridis(discrete = T) + theme_bw()
-b$Gene <- as.factor(b$Gene)
 
 
 ####STATS####
@@ -124,4 +123,18 @@ TukeyHSD(aov_genes)
 
 ##Region data is not normal. Test between regions can't use ANOVA, use non-parametric Kruskal-Wallis alternative.
 kruskal.test(region_list)
+
+
+
+##Output tables
+write.table(b, file="~/Desktop/table.txt", sep="\t", row.names = F, quote = F)
+
+
+##Plots
+ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6), stat="identity") + geom_bar(aes(y=Sequenced), stat="identity") + theme(axis.text.x = element_text(angle=90))
+str(a)
+
+ggplot(b, aes(x=Region)) + geom_boxplot(aes(y=Rate)) + ylim(c(0,0.05))
+ggplot(b, aes(x=Region, y=Rate, group=Gene)) + geom_bar(aes(fill = Gene), stat="identity", position="dodge") + theme(axis.text.x = element_text(angle=90)) + scale_colour_viridis(discrete = T) + theme_bw()
+b$Gene <- as.factor(b$Gene)
 
