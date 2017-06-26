@@ -1,15 +1,18 @@
 library(ggplot2)
 library(viridis)
 library(ggforce)
+
 #BOVINE
 #popoolation <- read.table("~/bovine/merged_runs/popoolation/subsampled200-no-na.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
 
 #EQUINE
 popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled200-tabbed.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
+popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled340.ready.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
+popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled200.ready.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
+popoolation <- read.table("~/equine/2014_11_24/popoolation/temp.txt", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
 
 
 ###Determine BH significance levels
-
 #order data by p value, from lowest to highest
 sorted.by.p <- popoolation[order(popoolation$invlogp, decreasing=T),]	
 
@@ -65,8 +68,15 @@ sorted.by.p$Chromosome <- factor(sorted.by.p$Chromosome, levels = c("chr1", "chr
 
 
 
-plot1 <- ggplot(sorted.by.p) + geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.5) + geom_hline(yintercept=intercept, col="red") + theme_classic() +  xlab("")+ ylab("-log(p)")+ theme(legend.position="none") + expand_limits(y=c(0,6)) + scale_colour_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue")) + theme(axis.text.x=element_text(angle = 45, hjust=1), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15))
-plot1
+plot2 <- ggplot(sorted.by.p) + 
+  geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.5) + 
+  geom_hline(yintercept=intercept, col="red") + 
+  theme_classic() +  xlab("") + 
+  ylab("-log(p)")+ theme(legend.position="none") + 
+  expand_limits(y=c(0,6)) + 
+  scale_colour_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue")) + 
+  theme(axis.text.x=element_text(angle = 45, hjust=1), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15))
+plot2
 
 sig_only <- subset(sorted.by.p, sorted.by.p$significant == "TRUE")
 sig_only <- head(sorted.by.p, paste(lowest.significant.row))
@@ -74,32 +84,21 @@ nrow(sig_only)
 write.table(sig_only, file = "~/Desktop/sig-only200.txt", quote = F, sep = "\t", row.names = F)
 
 
-  # ggd.qqplot = function(pvector, main=NULL, ...) {
-#   o = -log10(sort(pvector,decreasing=F))
-#   e = -log10( 1:length(o)/length(o) )
-#   plot(e,o,pch=19,cex=1, main=main, ...,
-#        xlab=expression(Expected~~-log[10](italic(p))),
-#        ylab=expression(Observed~~-log[10](italic(p))),
-#        xlim=c(0,max(e)), ylim=c(0,max(o)))
-#   lines(e,e,col="red")
-# }
-# 
-# # Using the ggd.qqplot() function
-# ggd.qqplot(sorted.by.p$actual.p)
-# 
-# # Add a title
-# ggd.qqplot(sorted.by.p$actual.p, "QQ-plot of p-values using ggd.qqplot")
-# nrow(sorted.by.p)
-# 
-# hist(sorted.by.p$invlogp)
-# hist(sorted.by.p$actual.p)
-
 #######################
 ###ZOOM IN ON REGION###
 #######################
 
-ggplot(sorted.by.p) + geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.49) + facet_zoom(x=Chromosome=='chr10') + theme_bw() + xlab("") + ylab('Inv log (P)') + theme(legend.position="none") + scale_color_viridis(discrete=T)
-
-
-+ geom_hline(yintercept=intercept, col="red") + theme_classic() +  xlab("")+ ylab("-log(p)")+ theme(legend.position="none") + expand_limits(y=c(0,6)) + 
+ggplot(sorted.by.p) + 
+  geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.49) + 
+  facet_zoom(x=Chromosome=='chr10') + theme_bw() + 
+  xlab("") + 
+  ylab('Inv log (P)') + 
+  theme(legend.position="none") + 
+  scale_color_viridis(discrete=T) + 
+  geom_hline(yintercept=intercept, col="red") + 
+  theme_classic() +  
+  xlab("")+ 
+  ylab("-log(p)")+ 
+  theme(legend.position="none") + 
+  expand_limits(y=c(0,6)) 
   
