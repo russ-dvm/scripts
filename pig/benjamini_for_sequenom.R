@@ -49,7 +49,7 @@ all_conditions <- lapply(all_files, read.table, h=T)
 ##Perform multiple testing correction on all the dataframes using ldply (from the plyr package), which applies the function over each list item and returns a single dataframe composed of all list items.
 all_conditions_df <- ldply(all_conditions, benj_hoch, 0.05)
 
-#use tidyr to combine the frequency of alt_allele, whether it is BH-significant, and the original P value into a singal column
+#use tidyr to combine the frequency of alt_allele, whether it is BH-significant, and the original P value into a single column
 all_conditions_df_united <- unite(all_conditions_df, sig_p, c(significant, P))
 all_conditions_df_united <- unite(all_conditions_df_united, freq_sig_p, c(F_A, sig_p), sep="<")
 
