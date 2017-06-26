@@ -71,6 +71,7 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
     #d$pos=d$BP/1e6
     d$pos=d$BP
     ticks=floor(length(d$pos))/2+1
+    minor_ticks=floor(length(d$pos))/2+1
     xlabel = paste('Chromosome',unique(d$CHR),'position')
     labs = ticks
   } else { ## For multiple chromosomes
@@ -88,6 +89,9 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
       # New way: doesn't make that assumption
       ticks = c(ticks, (min(d[d$index == i,]$pos) + max(d[d$index == i,]$pos))/2 + 1)
       
+      #ticks that bound the chromosome, rather than appear at its center - RSF
+      minor_ticks = c(minor_ticks, min(d[d$index == i,]$pos, max(d[d$index == i,]$pos)))
+      
     }
     xlabel = 'Chromosome'
     #labs = append(unique(d$CHR),'') ## I forgot what this was here for... if seems to work, remove.
@@ -102,6 +106,7 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
   ## The datafrmae (d) can then be used in ggplot along with the ticks and labels
   assign('ticks', ticks, envir=.GlobalEnv)
   assign('labs',labs, envir= .GlobalEnv)
+  assign('minor_ticks', minor_ticks, envir= .GlobalEnv)
   return(d)
   
 }
@@ -112,12 +117,39 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
 complete_results <-read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/eQTL_results_no-outliers/eQTL_results_LR_min3/cis_summary_86000.txt", h=T)
 
 complete_results$snp_chrom <- sub("chr", "", complete_results$snp_chrom)
-complete_results$snp_chrom <- sub("X", "20", complete_results$snp_chrom)
-qq_results <- data.frame("CHR" =as.integer(complete_results$snp_chrom), "BP" = as.integer(complete_results$snp_pos), "P" = as.numeric(complete_results$p.value), "SNP" = as.character(complete_results$snp_id))
+complete_results$snp_chrom <- sub("X", "19", complete_results$snp_chrom)
 
-##Manhattan plot, no legend, with most significant labeled
-# ggplot(all) + geom_jitter(aes(x=snp_chrom, y=-log10(FDR), color=snp_chrom)) + geom_hline(yintercept=-log10(0.05)) + geom_hline(yintercept=-log10(0.001), linetype=3) + theme_bw() + xlab("") + theme(axis.text.x = element_text(angle=45, hjust=1, size=20), axis.text.y=element_text(size=20), legend.position="NONE", axis.title.y=element_text(size=20)) + scale_color_manual(values=c("#b2df8a","#1f78b4", "#b2df8a","#1f78b4", "#b2df8a","#1f78b4", "#b2df8a","#1f78b4", "#b2df8a","#1f78b4", "#b2df8a","#1f78b4", "#b2df8a","#1f78b4", "#b2df8a","#1f78b4", "#b2df8a","#1f78b4", "#b2df8a")) + scale_y_continuous(breaks=seq(0:6))
+#Determine significance cutoff
+sig <- complete_results$p.value < complete_results$FDR
 
+
+
+qq_results <- data.frame("CHR" = as.integer(complete_results$snp_chrom), "BP" = as.integer(complete_results$snp_pos), "P" = as.numeric(complete_results$FDR), "SNP" = as.character(complete_results$snp_id))
+
+##In order for this hack to work properly, "data" points corresponding to the first and last position of each chromosome need to be added in. I add them with the P-value as "hide", which lets them be manipulable later on.
+for (x in 1:20){
+  qq_results <- rbind(qq_results, c(x, 1, NA, NA))
+}
+qq_results <- rbind(qq_results, c(1, 274330000, NA, NA))
+qq_results <- rbind(qq_results, c(2, 151940000, NA, NA))
+qq_results <- rbind(qq_results, c(3, 132850000, NA, NA))
+qq_results <- rbind(qq_results, c(4, 130910000, NA, NA))
+qq_results <- rbind(qq_results, c(5, 104530000, NA, NA))
+qq_results <- rbind(qq_results, c(6, 170840000, NA, NA))
+qq_results <- rbind(qq_results, c(7, 121840000, NA, NA))
+qq_results <- rbind(qq_results, c(8, 138970000, NA, NA))
+qq_results <- rbind(qq_results, c(9, 139510000, NA, NA))
+qq_results <- rbind(qq_results, c(10, 69360000, NA, NA))
+qq_results <- rbind(qq_results, c(11, 79170000, NA, NA))
+qq_results <- rbind(qq_results, c(12, 61600000, NA, NA))
+qq_results <- rbind(qq_results, c(13, 208340000, NA, NA))
+qq_results <- rbind(qq_results, c(14, 141760000, NA, NA))
+qq_results <- rbind(qq_results, c(15, 140410000, NA, NA))
+qq_results <- rbind(qq_results, c(16, 79940000, NA, NA))
+qq_results <- rbind(qq_results, c(17, 63490000, NA, NA))
+qq_results <- rbind(qq_results, c(18, 55980000, NA, NA))
+qq_results <- rbind(qq_results, c(19, 125940000, NA, NA)) #X chrom
+qq_results <- rbind(qq_results, c(20, 43550000, NA, NA)) #Y chrom
 
 ### Use qqman manhattan function to format the data appropriately for a Manhattan plot
 d <- manhattan(qq_results)
@@ -125,9 +157,7 @@ d <- manhattan(qq_results)
 ##Change the chroms from numeric to factors, for colouring purposes.
 d$CHR <- as.factor(d$CHR)
 
-###"extra" data points that were added to set the pos values should be removed prior to plotting:
-#Requires the snp value "hide" for any additional "data" point that was added.
-d.real <- subset(d, d$SNP != 'hide')
+#Determine the significance cutoff:
 
 
 ##GGPLOT MOD BY RUSSELL FRASER
@@ -135,7 +165,23 @@ d.real <- subset(d, d$SNP != 'hide')
 #There's probably a smart workaround, but for now, the best I can come up with is saving a copy of the graph with
 # and without the sacle_x_continous as SVG and then merging the two. 
 
-ggplot(d) + geom_point(aes(x=pos, y=logp, color=CHR)) + theme_classic()+ ylab("-log(p)") #+ theme(axis.text.x=element_text(angle = 60, hjust=1, size=9), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15), legend.position = "none") + scale_color_viridis(discrete=T) + geom_hline(yintercept=-log10(0.001), colour="red") #+ facet_zoom(x=CHR==1)+ facet_zoom(x=CHR==1 & BP > 88892979 & BP < 89006643) + scale_x_continuous(breaks=c(ticks), labels=labs)
+cols <- c("darkolivegreen4", "dodgerblue3","orange", "blue","orange", "blue","orange", "blue","orange", "blue","orange", "blue","orange", "blue","orange", "blue","orange", "blue","orange", "blue")
+cols <- c("darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3")
+
+
+ggplot(d) + 
+  geom_point(aes(x=pos, y=logp, color=CHR), size = 1) + 
+  theme_bw()+ ylab("-log(FDR)") + 
+  theme(axis.text.x=element_text(angle = 60, hjust=1, size=15), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15), legend.position = "none") + 
+  theme(panel.grid.minor.x = element_line(colour = "light grey"), panel.grid.major.x = element_blank()) +
+  theme(panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank()) +
+  # scale_color_viridis(discrete=T) + 
+  scale_color_manual(values = cols) +
+  geom_hline(yintercept=-log10(0.001), colour="gray33", linetype = 3) + 
+  geom_hline(yintercept=-log10(0.05), colour="gray33") + 
+  scale_x_continuous(minor_breaks = minor_ticks, breaks = ticks, labels = labs) +
+  facet_zoom(x=CHR==14 & BP > 20000000 & BP < 110000000) +
+  theme(strip.background = element_rect(fill="grey88"))
 
 # ggsave("~/Dropbox/chrom.svg")
 
