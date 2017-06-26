@@ -182,7 +182,8 @@ ggplot(d) +
   geom_hline(yintercept=-log10(0.05), colour="gray33") + 
   scale_x_continuous(minor_breaks = minor_ticks, breaks = ticks, labels = labs) +
   facet_zoom(x=CHR==14 & BP > 20000000 & BP < 110000000) +
-  theme(strip.background = element_rect(fill="grey88"))
+  theme(strip.background = element_rect(fill="grey88")) +
+  xlab("")
 
 # ggsave("~/Dropbox/chrom.svg")
 
