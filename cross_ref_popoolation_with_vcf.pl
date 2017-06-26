@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 #RFraser, May 27, 2016
-#Take the output of the fisher's exact test script from popoolation two and grab the corresponding VCF entries from a VCF input file. Will append the significance of the FET to the VCF entry.
+#Take the output of the fisher's exact test script from popoolation2 and grab the corresponding VCF entries from a VCF input file. Will append the significance of the FET to the VCF entry.
 
 #Helpful if the FET file only contains significant results (could use sed for this - e.g. sed '/na/d' will delete lines containing na.)
 
