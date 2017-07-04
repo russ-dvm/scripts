@@ -10,7 +10,7 @@ library(ggforce)
 manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP", 
                       col=c("gray10", "gray60"), chrlabs=NULL,
                       suggestiveline=-log10(1e-5), genomewideline=-log10(5e-8), 
-                      highlight=NULL, logp=TRUE, annotatePval = NULL, annotateTop = TRUE, ...) {
+                      highlight=NULL, logp=TRUE, annotatePval = NULL, annotateTop = TRUE, X=NULL, Y=NULL, ...) {
   
   # Not sure why, but package check will warn without this.
   CHR=BP=P=index=NULL
@@ -90,13 +90,15 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
       # New way: doesn't make that assumption
       ticks = c(ticks, (min(d[d$index == i,]$pos) + max(d[d$index == i,]$pos))/2 + 1)
       
-      #ticks that bound the chromosome, rather than appear at its center - RSF
+      ##MOD: ticks that bound the chromosome, rather than appear at its center - RSF
       minor_ticks = c(minor_ticks, min(d[d$index == i,]$pos, max(d[d$index == i,]$pos)))
       
     }
     xlabel = 'Chromosome'
     #labs = append(unique(d$CHR),'') ## I forgot what this was here for... if seems to work, remove.
     labs <- unique(d$CHR)
+    labs[X] <- "X"
+    labs[Y] <- "Y"
   }
   
   # Initialize plot
@@ -153,7 +155,7 @@ qq_results <- rbind(qq_results, c(19, 125940000, NA, NA)) #X chrom
 qq_results <- rbind(qq_results, c(20, 43550000, NA, NA)) #Y chrom
 
 ### Use qqman manhattan function to format the data appropriately for a Manhattan plot
-d <- manhattan(qq_results)
+d <- manhattan(qq_results, X=19, Y=20)
 
 ##Change the chroms from numeric to factors, for colouring purposes.
 d$CHR <- as.factor(d$CHR)
