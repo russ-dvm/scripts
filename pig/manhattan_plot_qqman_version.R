@@ -97,6 +97,8 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
     xlabel = 'Chromosome'
     #labs = append(unique(d$CHR),'') ## I forgot what this was here for... if seems to work, remove.
     labs <- unique(d$CHR)
+
+    ##MOD - use the X and Y options to rename the X and Y chromosomes to the more appropriate "X" and "Y". This does coerce labs into character instead of numeric but that doesn't seem to affect the output of ggplot2. RSF.
     labs[X] <- "X"
     labs[Y] <- "Y"
   }
@@ -129,36 +131,39 @@ sig <- complete_results$p.value < complete_results$FDR
 
 qq_results <- data.frame("CHR" = as.integer(complete_results$snp_chrom), "BP" = as.integer(complete_results$snp_pos), "P" = as.numeric(complete_results$FDR), "SNP" = as.character(complete_results$snp_id))
 
-##In order for this hack to work properly, "data" points corresponding to the first and last position of each chromosome need to be added in. I add them with the P-value as "hide", which lets them be manipulable later on.
+##In order for this hack to work properly, "data" points corresponding to the first and last position of each chromosome need to be added in. I add them with the P-value as NA, which automatically omits them in ggplot2. Data is from Ensembl Sus scrofa 10.2.
 for (x in 1:20){
   qq_results <- rbind(qq_results, c(x, 1, NA, NA))
 }
-qq_results <- rbind(qq_results, c(1, 274330000, NA, NA))
-qq_results <- rbind(qq_results, c(2, 151940000, NA, NA))
-qq_results <- rbind(qq_results, c(3, 132850000, NA, NA))
-qq_results <- rbind(qq_results, c(4, 130910000, NA, NA))
-qq_results <- rbind(qq_results, c(5, 104530000, NA, NA))
-qq_results <- rbind(qq_results, c(6, 170840000, NA, NA))
-qq_results <- rbind(qq_results, c(7, 121840000, NA, NA))
-qq_results <- rbind(qq_results, c(8, 138970000, NA, NA))
-qq_results <- rbind(qq_results, c(9, 139510000, NA, NA))
-qq_results <- rbind(qq_results, c(10, 69360000, NA, NA))
-qq_results <- rbind(qq_results, c(11, 79170000, NA, NA))
-qq_results <- rbind(qq_results, c(12, 61600000, NA, NA))
-qq_results <- rbind(qq_results, c(13, 208340000, NA, NA))
-qq_results <- rbind(qq_results, c(14, 141760000, NA, NA))
-qq_results <- rbind(qq_results, c(15, 140410000, NA, NA))
-qq_results <- rbind(qq_results, c(16, 79940000, NA, NA))
-qq_results <- rbind(qq_results, c(17, 63490000, NA, NA))
-qq_results <- rbind(qq_results, c(18, 55980000, NA, NA))
-qq_results <- rbind(qq_results, c(19, 125940000, NA, NA)) #X chrom
-qq_results <- rbind(qq_results, c(20, 43550000, NA, NA)) #Y chrom
+qq_results <- rbind(qq_results, c(1, 315321322, NA, NA))
+qq_results <- rbind(qq_results, c(2, 162569375, NA, NA))
+qq_results <- rbind(qq_results, c(3, 144787322, NA, NA))
+qq_results <- rbind(qq_results, c(4, 143465943, NA, NA))
+qq_results <- rbind(qq_results, c(5, 111506441, NA, NA))
+qq_results <- rbind(qq_results, c(6, 157765593, NA, NA))
+qq_results <- rbind(qq_results, c(7, 134764511, NA, NA))
+qq_results <- rbind(qq_results, c(8, 148491826, NA, NA))
+qq_results <- rbind(qq_results, c(9, 153670197, NA, NA))
+qq_results <- rbind(qq_results, c(10, 79102373, NA, NA))
+qq_results <- rbind(qq_results, c(11, 87690581, NA, NA))
+qq_results <- rbind(qq_results, c(12, 63558571, NA, NA))
+qq_results <- rbind(qq_results, c(13, 218635234, NA, NA))
+qq_results <- rbind(qq_results, c(14, 153851969, NA, NA))
+qq_results <- rbind(qq_results, c(15, 157681621, NA, NA))
+qq_results <- rbind(qq_results, c(16, 86898991, NA, NA))
+qq_results <- rbind(qq_results, c(17, 69701581, NA, NA))
+qq_results <- rbind(qq_results, c(18, 61220071, NA, NA))
+qq_results <- rbind(qq_results, c(19, 144288218, NA, NA)) #X chrom
+qq_results <- rbind(qq_results, c(20, 1637716, NA, NA)) #Y chrom
 
-### Use qqman manhattan function to format the data appropriately for a Manhattan plot
+### Use modified qqman manhattan function to format the data appropriately for a Manhattan plot
 d <- manhattan(qq_results, X=19, Y=20)
 
 ##Change the chroms from numeric to factors, for colouring purposes.
 d$CHR <- as.factor(d$CHR)
+
+#add the end limit to chrY for minor_ticks
+minor_ticks <- c(minor_ticks, tail(minor_ticks, 1) + 1637716)
 
 #Determine the significance cutoff:
 
