@@ -77,30 +77,30 @@ corr.test(ref)
 #Comparison of ITIH4 and SAA to top 20 innate immune genes
 top20 <- c("DDX3Y", "MBL2", "SCGB1A1", "PR39", "PMAP.23", "PMAP.37", "NPG4.AVG", "SFTPD", "PGLYRP1.A", "HAMP.AVG", "PGLYRP2.B", "MYD88", "CLEC1B", "LBP", "PMAP.36", "PBD.2", "ITLN2.AVG", "KLRF1", "DDX58.AVG","BD.104.like.2")
 
-
-#itih_list
-itih_list <- list()
-for (i in 1:length(top20)){
-  a <- heatmap[, c("ITIH4.AVG", top20[i])]
-  b <- corr.test(a)
-  c <- b$r
-  itih_list[[i]] <- c
+comp_top_20 <- function(app, top20) {
+  app_list <- list()
+  for (i in 1:length(top20)){
+    a <- heatmap[, c(app, top20[i])]
+    b <- corr.test(a)
+    c <- b$r
+    app_list[[i]] <- c
+  }
+  return(app_list)
 }
-itih_list
 
-#SAA list
-saa_list <- list()
-for (i in 1:length(top20)){
-  a <- heatmap[, c("SAA.AVG", top20[i])]
-  b <- corr.test(a)
-  c <- b$r
-  saa_list[[i]] <- c
-}
+itih_list <- comp_top_20("ITIH4.AVG", top20)
+saa_list <- comp_top_20("SAA.AVG", top20)
+cp_list <- comp_top_20("CP.AVG", top20)
+hp_list <- comp_top_20("HP.AVG", top20)
+crp_list <- comp_top_20("CRP", top20)
+orm_list <- comp_top_20("ORM1", top20)
+
+
 
 
 #some graphs for BL
-ggplot(heatmap, aes(x = ITIH4.AVG, y = PGLYRP2.B)) + geom_point() + geom_smooth(method = lm, se =F)
-ggplot(heatmap, aes(x = ITIH4.AVG, y = MYD88)) + geom_point() + geom_smooth(method = lm, se =F)
-ggplot(heatmap, aes(x = ITIH4.AVG, y = LBP)) + geom_point() + geom_smooth(method = lm, se =F)
-ggplot(heatmap, aes(x = ITIH4.AVG, y = DDX58.AVG)) + geom_point() + geom_smooth(method = lm, se =F)
-ggplot(heatmap, aes(x = SAA.AVG, y = LBP)) + geom_point() + geom_smooth(method = lm, se =F)
+ggplot(heatmap, aes(x = ITIH4.AVG, y = PGLYRP2.B)) + geom_point() + geom_smooth(method = lm, se = T)
+ggplot(heatmap, aes(x = ITIH4.AVG, y = MYD88)) + geom_point() + geom_smooth(method = lm, se = T)
+ggplot(heatmap, aes(x = ITIH4.AVG, y = LBP)) + geom_point() + geom_smooth(method = lm, se =T)
+ggplot(heatmap, aes(x = ITIH4.AVG, y = DDX58.AVG)) + geom_point() + geom_smooth(method = lm, se = T)
+ggplot(heatmap, aes(x = SAA.AVG, y = LBP)) + geom_point() + geom_smooth(method = lm, se = T)
