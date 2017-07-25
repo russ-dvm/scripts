@@ -61,3 +61,46 @@ bd129_gap$gap_avg <- rowMeans(bd129_gap[,8:9])
 
 ##BL figured out that the averages were performed as follows: the raw data (not available here) was averaged and THEN log2 transformed. The values used here are all log2 transformed; thus 
 bd129_gap$log <- log(bd129_gap$avg)
+
+
+
+##BL requested check of ref genes and acute phase protein genes, as well as a comparison of APP genes vs top 20 variable innate immune genes
+heatmap <- read.table("~/Dropbox/Research/Lab Book/NGS/oink/microarray/figs_for_paper/heatmap_data.txt", h=T, sep = "\t")
+
+#APP & Ref genes
+app <- heatmap[,c("CP.AVG", "CRP", "HP.AVG", "ITIH4.AVG", "ORM1", "SAA.AVG")]
+corr.test(app)
+
+ref <- heatmap[, c("ACTB.AVG", "B2M.AVG", "GAPDH", "HPRT1", "SDHA.AVG")]
+corr.test(ref)
+
+#Comparison of ITIH4 and SAA to top 20 innate immune genes
+top20 <- c("DDX3Y", "MBL2", "SCGB1A1", "PR39", "PMAP.23", "PMAP.37", "NPG4.AVG", "SFTPD", "PGLYRP1.A", "HAMP.AVG", "PGLYRP2.B", "MYD88", "CLEC1B", "LBP", "PMAP.36", "PBD.2", "ITLN2.AVG", "KLRF1", "DDX58.AVG","BD.104.like.2")
+
+
+#itih_list
+itih_list <- list()
+for (i in 1:length(top20)){
+  a <- heatmap[, c("ITIH4.AVG", top20[i])]
+  b <- corr.test(a)
+  c <- b$r
+  itih_list[[i]] <- c
+}
+itih_list
+
+#SAA list
+saa_list <- list()
+for (i in 1:length(top20)){
+  a <- heatmap[, c("SAA.AVG", top20[i])]
+  b <- corr.test(a)
+  c <- b$r
+  saa_list[[i]] <- c
+}
+
+
+#some graphs for BL
+ggplot(heatmap, aes(x = ITIH4.AVG, y = PGLYRP2.B)) + geom_point() + geom_smooth(method = lm, se =F)
+ggplot(heatmap, aes(x = ITIH4.AVG, y = MYD88)) + geom_point() + geom_smooth(method = lm, se =F)
+ggplot(heatmap, aes(x = ITIH4.AVG, y = LBP)) + geom_point() + geom_smooth(method = lm, se =F)
+ggplot(heatmap, aes(x = ITIH4.AVG, y = DDX58.AVG)) + geom_point() + geom_smooth(method = lm, se =F)
+ggplot(heatmap, aes(x = SAA.AVG, y = LBP)) + geom_point() + geom_smooth(method = lm, se =F)
