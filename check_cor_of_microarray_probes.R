@@ -96,11 +96,39 @@ crp_list <- comp_top_20("CRP", top20)
 orm_list <- comp_top_20("ORM1", top20)
 
 
-
-
 #some graphs for BL
 ggplot(heatmap, aes(x = ITIH4.AVG, y = PGLYRP2.B)) + geom_point() + geom_smooth(method = lm, se = T)
 ggplot(heatmap, aes(x = ITIH4.AVG, y = MYD88)) + geom_point() + geom_smooth(method = lm, se = T)
 ggplot(heatmap, aes(x = ITIH4.AVG, y = LBP)) + geom_point() + geom_smooth(method = lm, se =T)
 ggplot(heatmap, aes(x = ITIH4.AVG, y = DDX58.AVG)) + geom_point() + geom_smooth(method = lm, se = T)
 ggplot(heatmap, aes(x = SAA.AVG, y = LBP)) + geom_point() + geom_smooth(method = lm, se = T)
+
+ggplot(heatmap, aes(x= LBP)) + 
+  geom_point(aes(y = ITIH4.AVG, colour = "ITIH4")) + 
+  geom_point(aes(y = SAA.AVG, colour = "SAA")) + 
+  geom_point(aes(y = CP.AVG, colour = "CP")) + 
+  geom_point(aes(y = CRP, colour = "CRP")) + 
+  geom_point(aes(y = ORM1, colour = "ORM1")) +
+  geom_point(aes(y = HP.AVG, colour = "HP")) +
+  geom_smooth(aes(y = ITIH4.AVG, colour = "ITIH4"), method = lm, se = F) + 
+  geom_smooth(aes(y = SAA.AVG, colour = "SAA"), method = lm, se = F) + 
+  geom_smooth(aes(y = CP.AVG, colour = "CP"), method = lm, se = F) + 
+  geom_smooth(aes(y = CRP, colour = "CRP"), method = lm, se = F) + 
+  geom_smooth(aes(y = ORM1, colour = "ORM1"), method = lm, se = F) + 
+  geom_smooth(aes(y = HP.AVG, colour = "HP"), method = lm, se = F) +
+  ylab("Ref Gene")
+  
+#Which pigs are expressing high levels of variable APP genes?
+#Construct a datafreame containing the APPs and pig IDs
+app1 <- heatmap[,c("pig", "CP.AVG", "CRP", "HP.AVG", "ITIH4.AVG", "ORM1", "SAA.AVG")]
+
+#Assign ranks to pigs that express the highest APPs - higher rank == higher expression
+app2 <- app[order(app$ITIH4.AVG, decreasing = T),]
+app2$itih_rank <- c(1:nrow(app2))
+app3 <- app2[order(app2$SAA.AVG, decreasing = T),]
+app3$saa_rank <- c(1:nrow(app3))
+app4 <- app3[order(app3$CRP, decreasing = T),]
+app4$crp_rank <- c(1:nrow(app3))
+
+## Do the ranks for the different APPs correlate?
+corr.test(app4[, grep("rank", colnames(app4))])
