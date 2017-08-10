@@ -74,7 +74,7 @@ corr.test(app)
 ref <- heatmap[, c("ACTB.AVG", "B2M.AVG", "GAPDH", "HPRT1", "SDHA.AVG")]
 corr.test(ref)
 
-#Comparison of ITIH4 and SAA to top 20 innate immune genes
+#Comparison of ITIH4 and SAA to top 20 innate immune genes - based on BL's re-ranking using GER 50/5 from 17-07-25.
 top20 <- c("DDX3Y", "MBL2", "SCGB1A1", "PR39", "PMAP.23", "PMAP.37", "NPG4.AVG", "SFTPD", "PGLYRP1.A", "HAMP.AVG", "PGLYRP2.B", "MYD88", "CLEC1B", "LBP", "PMAP.36", "PBD.2", "ITLN2.AVG", "KLRF1", "DDX58.AVG","BD.104.like.2")
 
 comp_top_20 <- function(app, top20) {

@@ -224,7 +224,7 @@ fig2 <- ggplot(master_trimmed, aes(x=rank, y=Value)) +
   geom_point(shape = 23, size=3, colour="black", fill="dark grey") + 
   facet_wrap(~Gene) + 
   theme_bw() + 
-  ylab(expression(paste("Gene expression", '('~log[2]~')'))) +
+  ylab(expression(paste("Gene expression ", '('~log[2]~')'))) +
   xlab("") + 
   theme(axis.ticks.x = element_blank(), axis.text.x = element_blank(), axis.ticks.y = element_line(colour="light grey"), panel.grid.minor.x = element_blank(), panel.grid.major.x = element_blank(), panel.grid.major.y = element_line(color="light grey"), panel.grid.minor.y = element_blank()) + 
   theme(strip.text = element_text(size=12, face = "italic"), text = element_text(size=12)) +

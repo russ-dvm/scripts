@@ -3,8 +3,12 @@ library(viridis)
 library(plyr)
 
 annotation_info <- read.table("~/equine/2014_11_24/depth_of_regions/annotation_info.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F)
+
+#contains PGLYRPS
 annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/next_version.txt", h=T, sep="\t")
-sifted <- read.table("~/equine/2014_11_24/depth_of_regions/sifted.txt", h=T, sep="\t")
+
+#no pglyrps and has fcn1-like.
+annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/annotated_depth_and_variants.txt", h=T, sep="\t")
 
 #Clean up the annotation_info - there are a few records that have "na-" in them - didn't want to lose the info, but also don't want to use it. Check rows before proceeding... Don't actually have to do this step, but it will generate warnings down the line.
 # 
@@ -26,7 +30,7 @@ summarize <- function(info, data, depth){
     
     region_total <- 0
     
-    #Ok I know you're not supposed to use for loops in R but this just seemed to accomplish what I needed in the time I needed to accomplihs it... Plus no one will probably ever look at this, so great.
+    #Ok I know you're not supposed to use for loops in R but this just seemed to accomplish what I needed in the time I needed to accomplish it... Plus no one will probably ever look at this, so great.
     for(region in regions){
       all_gene_targeted_total <- 0
       all_gene_sequenced_total <- 0
@@ -63,7 +67,7 @@ summarize <- function(info, data, depth){
   return(output)
 }
 
-###I would argue that our variance rate will be elevated, because most estimates of the rate of variance are in teh genome of one animal - our resolution maxes out at 3. So if you assume that some variants will be shared, and others not, then ahving multiple animals in a pool will result in a higher number of total variants, artifically elevating the rate. So, it is perhaps not useful to compare rates against other species, but rather between genes. So, for now, this is commented out and not pursued. Uncomment if you want to have a look at individual group stuff. 
+###I would argue that our variance rate will be elevated, because most estimates of the rate of variance are in the genome of one animal - our resolution maxes out at 3. So if you assume that some variants will be shared, and others not, then having multiple animals in a pool will result in a higher number of total variants, artifically elevating the rate. So, it is perhaps not useful to compare rates against other species, but rather between genes. So, for now, this is commented out and not pursued. Uncomment if you want to have a look at individual group stuff. 
 
 #Can have a look at the different group variation rate by importing an file annotated by the variants present in each group (split the variants in GATK first, then run the add_variants_to_... python script using each sub-vcf file)
 
@@ -77,12 +81,10 @@ summarize <- function(info, data, depth){
 # 
 # b <- ldply(all_groups, summarize, info=annotation_info, depth=445)
 
+
 ##Apply the summarize function to the data
 a <- summarize(annotation_info, annotated_depth, 445)
 a
-
-b <- summarize(annotation_info, sifted, 445)
-b
 
 a_low <- summarize(annotation_info, annotated_depth, 10)
 a_low
@@ -131,10 +133,20 @@ write.table(b, file="~/Desktop/table.txt", sep="\t", row.names = F, quote = F)
 
 
 ##Plots
-ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6), stat="identity") + geom_bar(aes(y=Sequenced), stat="identity") + theme(axis.text.x = element_text(angle=90))
+ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6, fill = Region), stat="identity") + geom_bar(aes(y=Sequenced, fill = Region), stat="identity") + theme(axis.text.x = element_text(angle=90))
 str(a)
 
 ggplot(b, aes(x=Region)) + geom_boxplot(aes(y=Rate)) + ylim(c(0,0.05))
 ggplot(b, aes(x=Region, y=Rate, group=Gene)) + geom_bar(aes(fill = Gene), stat="identity", position="dodge") + theme(axis.text.x = element_text(angle=90)) + scale_colour_viridis(discrete = T) + theme_bw()
-b$Gene <- as.factor(b$Gene)
 
+##Collectins only
+ggplot(colec, aes(x = Gene, y = Rate)) + 
+  geom_bar(aes(fill = Region), stat="identity") +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+ggplot(colec, aes(x = Region, y = Rate)) + 
+  geom_boxplot() +
+  theme_bw() + 
+  ylab("Rate (SNP/bp)") + 
+  xlab("")
