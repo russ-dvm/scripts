@@ -140,12 +140,13 @@ ggplot(b, aes(x=Region)) + geom_boxplot(aes(y=Rate)) + ylim(c(0,0.05))
 ggplot(b, aes(x=Region, y=Rate, group=Gene)) + geom_bar(aes(fill = Gene), stat="identity", position="dodge") + theme(axis.text.x = element_text(angle=90)) + scale_colour_viridis(discrete = T) + theme_bw()
 
 ##Collectins only
-ggplot(colec, aes(x = Gene, y = Rate)) + 
-  geom_bar(aes(fill = Region), stat="identity") +
+ggplot(colec, aes(x = Gene, y = Rate*1000)) + 
+  geom_bar(aes(fill = Region), stat="identity", position = "dodge") +
   theme_bw() + 
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  ylab("Rate (SNPs/kb)")
 
-ggplot(colec, aes(x = Region, y = Rate)) + 
+ggplot(colec, aes(x = Region, y = Rate, fill = Gene)) + 
   geom_boxplot() +
   theme_bw() + 
   ylab("Rate (SNP/bp)") + 
