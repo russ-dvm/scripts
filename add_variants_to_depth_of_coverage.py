@@ -53,7 +53,7 @@ for line in depth:
 				print(line, "TRUE", snpeff_dict[position], sep="\t")
 			else:
 				if args.all:
-					print(line, "TRUE", "FALSE", sep = "\t")
+					print(line, "FALSE", "FALSE", sep = "\t")
 				
 	else:
 		if "chrom" in line:
