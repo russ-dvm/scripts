@@ -47,13 +47,14 @@ bmt <- BiomartGeneRegionTrack(genome = "EquCab2", stacking = "squish", biomart =
 ##Decided to try an alternate strategy: use the annotated_variant dataset generated for "rate_of_snps.R" and see if I can summarize and then convert it into a GRanges object, so that the bargraph/"histogram" will actually represent what we want.
 
 ####SIMPLE graph - plots the total number of variants without any annotation
-####COMPLICATED graph - uses SnpEff annotation to highlight different variant types.
+####COMPLICATED graph - colours the histogram according to the different variant types. Note that because SnpEff annotates based on the information for multiple genes, the annotation with respect to OUR gene of interest is sometimes incorrect. E.g. for the Ficolins, you may have a SNP labeled as "downstream" when it is in fact an intron snp - this is because the snp occurs downstream of a gene that is within 5kb of the FCN...Anyways, can use the "feature" info of the annotated_depth DF to correct this, I think. Use the SnpEff info for better annotation on non-synonymous codingifelse variant...
 ##Simple
 annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/annotated_depth_and_variants.txt", h=T, sep="\t")
+annotated_depth <- read.table("~/Desktop/annotated_depth_and_variants.txt", h=T, sep="\t")
 ##Keep only variants
 annotated_depth_variants <- annotated_depth[annotated_depth$is_variant == T,]
 ##Slim down the table
-variants <- annotated_depth_variants[,c(1:2,12)]
+variants <- annotated_depth_variants[,c(1:2,5,12)]
 ##Only the variants in the selected gene
 gene_variants <- subset(variants, pos >= start & pos <= end)
 gene_missense_variants <- gene_variants[grep("missense", gene_variants$variant_type),]
@@ -139,5 +140,6 @@ var_track <- DataTrack(var_grange, name = "Variants", type = "histogram", chromo
 
 #The boxes to the left are the ".title" boxes - thus to manipulate the colours, use things like background.title or fontcolor.title. To see the names of all the parameters that can be manipulated -- names(displayPars(**TRACK**)). Can manipulate globally (within the plotTracks), or for individual tracks (within the tracks themselves).
 plotTracks(c(itrack, gtrack, bmt, var_track, dtrack, strack), from = start, to = end, min.height = 5)
+plotTracks(c(itrack, gtrack, bmt, var_track, strack), from = start, to = end, min.height = 5)
 
 

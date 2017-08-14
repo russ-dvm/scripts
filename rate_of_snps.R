@@ -3,12 +3,13 @@ library(viridis)
 library(plyr)
 
 annotation_info <- read.table("~/equine/2014_11_24/depth_of_regions/annotation_info.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F)
+annotation_info <- read.table("~/Desktop/annotation_info.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F)
 
 #contains PGLYRPS
 annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/next_version.txt", h=T, sep="\t")
 
 #no pglyrps and has fcn1-like.
-annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/annotated_depth_and_variants.txt", h=T, sep="\t")
+annotated_depth <- read.table("~/Desktop/annotated_depth_and_variants.txt", h=T, sep="\t")
 
 #Clean up the annotation_info - there are a few records that have "na-" in them - didn't want to lose the info, but also don't want to use it. Check rows before proceeding... Don't actually have to do this step, but it will generate warnings down the line.
 # 
@@ -133,21 +134,30 @@ write.table(b, file="~/Desktop/table.txt", sep="\t", row.names = F, quote = F)
 
 
 ##Plots
+## Bar plot of overall variation by gene
 ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6, fill = Region), stat="identity") + geom_bar(aes(y=Sequenced, fill = Region), stat="identity") + theme(axis.text.x = element_text(angle=90))
-str(a)
 
-ggplot(b, aes(x=Region)) + geom_boxplot(aes(y=Rate)) + ylim(c(0,0.05))
-ggplot(b, aes(x=Region, y=Rate, group=Gene)) + geom_bar(aes(fill = Gene), stat="identity", position="dodge") + theme(axis.text.x = element_text(angle=90)) + scale_colour_viridis(discrete = T) + theme_bw()
+# ggplot(b, aes(x=Region)) + geom_boxplot(aes(y=Rate)) + ylim(c(0,0.05))
+# ggplot(b, aes(x=Region, y=Rate, group=Gene)) + geom_bar(aes(fill = Gene), stat="identity", position="dodge") + theme(axis.text.x = element_text(angle=90)) + scale_colour_viridis(discrete = T) + theme_bw()
 
-##Collectins only
-ggplot(colec, aes(x = Gene, y = Rate*1000)) + 
+##Collectins only - box and bar plots, by region/gene
+ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
   geom_bar(aes(fill = Region), stat="identity", position = "dodge") +
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   ylab("Rate (SNPs/kb)")
 
-ggplot(colec, aes(x = Region, y = Rate, fill = Gene)) + 
+ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate)) + 
   geom_boxplot() +
-  theme_bw() + 
+  geom_jitter(aes(colour = Gene)) +
+  theme_bw() +
   ylab("Rate (SNP/bp)") + 
   xlab("")
+
+ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate)) + 
+  geom_boxplot() + 
+  geom_jitter(aes(colour = Region)) +
+  geom_line(aes())
+  theme_bw() +
+  ylab("Rate (SNP/bp)") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) 

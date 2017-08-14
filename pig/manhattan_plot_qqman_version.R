@@ -187,7 +187,8 @@ ggplot(d) +
   scale_color_manual(values = cols) +
   geom_hline(yintercept=-log10(0.001), colour="gray33", linetype = 3) + 
   geom_hline(yintercept=-log10(0.05), colour="gray33") + 
-  scale_x_continuous(minor_breaks = minor_ticks, breaks = ticks, labels = labs) +
+  # scale_x_continuous(minor_breaks = minor_ticks, breaks = ticks, labels = labs) +
+  scale_x_continuous(labels = scientific_10) +
   facet_zoom(x=CHR==14 & BP > 20000000 & BP < 110000000) +
   theme(strip.background = element_rect(fill="grey88")) +
   xlab("")
@@ -195,4 +196,13 @@ ggplot(d) +
 # ggsave("~/Dropbox/chrom.svg")
 
 #scale_color_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange"))
-
+scientific_10 <- function(l) {
+  # turn in to character string in scientific notation
+  l <- format(l, scientific = TRUE)
+  # quote the part before the exponent to keep all the digits
+  l <- gsub("^(.*)e", "'\\1'e", l)
+  # turn the 'e+' into plotmath format
+  l <- gsub("e", "%*%10^", l)
+  # return this as an expression
+  parse(text=l)
+}
