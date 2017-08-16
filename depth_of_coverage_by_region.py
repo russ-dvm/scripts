@@ -57,25 +57,25 @@ for line in gatk:
 	 				if "na" in feature_entry[0] or "na" in feature_entry[1]:
 	 					continue
 	 				elif int(feature_entry[0]) <= position <= int(feature_entry[1]):
-	 					# print(dict_chrom, position, depth, feature_entry[8], feature_entry[6], feature_entry[7], feature_entry[2], feature_entry[3], feature_entry[4], feature_entry[5], sep="\t")
+	 					 print(dict_chrom, position, depth, feature_entry[8], feature_entry[6], feature_entry[7], feature_entry[2], feature_entry[3], feature_entry[4], feature_entry[5], sep="\t")
 
-	 					pos_list.append(position)
+	 					#pos_list.append(position)
 
 
 ##Want to find the values that are missing? Uncomment this along with the pos_list stuff above and have a look. This takes forever meaning there is probably a much better way to do it...
 
-gatk.seek(0)
+#gatk.seek(0)
 
-for line2 in gatk:
+#for line2 in gatk:
 
-	fields = line2.split("\t")
-	if "Locus" in line2:
-		continue
-	else:
-	  	chrom_pos2 = fields[0].split(":")
-	 	posn = int(chrom_pos2[1])
-
-	if posn in pos_list:
-		continue
-	else:
-		print(posn)
+#	fields = line2.split("\t")
+#	if "Locus" in line2:
+#		continue
+#	else:
+#	  	chrom_pos2 = fields[0].split(":")
+#	 	posn = int(chrom_pos2[1])
+#
+#	if posn in pos_list:
+#		continue
+#	else:
+#		print(posn)
