@@ -1,15 +1,16 @@
 library(tidyverse)
 library(viridis)
 library(plyr)
+library(data.table)
 
 annotation_info <- read.table("~/equine/2014_11_24/depth_of_regions/annotation_info.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F)
-annotation_info <- read.table("~/Desktop/annotation_info.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F)
+annotation_info <- read.table("~/Desktop/annotation_info_utr_adjusted.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F, quote = "")
 
 #contains PGLYRPS
 annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/next_version.txt", h=T, sep="\t")
 
 #no pglyrps and has fcn1-like.
-annotated_depth <- read.table("~/Desktop/annotated_depth_and_variants.txt", h=T, sep="\t")
+annotated_depth <- read.table("~/Desktop/results_utr_adjusted.txt", h=T, sep="\t")
 
 #Clean up the annotation_info - there are a few records that have "na-" in them - didn't want to lose the info, but also don't want to use it. Check rows before proceeding... Don't actually have to do this step, but it will generate warnings down the line.
 # 
@@ -87,8 +88,18 @@ summarize <- function(info, data, depth){
 a <- summarize(annotation_info, annotated_depth, 445)
 a
 
-a_low <- summarize(annotation_info, annotated_depth, 10)
-a_low
+## Adjust for MBL1 50kb, which overlaps with SFTPD and it's upstream region. At some point when time is abundant, maybe integrate this into the function... 
+mbl_50_start <- 88892827
+mbl_50_end <- 88928053
+a <- data.table(a)
+a[Region == "upstream_50" & Gene == "MBL1"]$Total <- mbl_50_end - mbl_50_start
+mbl50_sequenced <- nrow(subset(annotated_depth, pos >= mbl_50_start & pos <= mbl_50_end))
+a[Region == "upstream_50" & Gene == "MBL1"]$Sequenced <- mbl50_sequenced
+mbl50_var <- nrow(subset(annotated_depth, pos >= mbl_50_start & pos <= mbl_50_end & is_variant == T))
+a[Region == "upstream_50" & Gene == "MBL1"]$No.variants <- mbl50_var
+a[Region == "upstream_50" & Gene == "MBL1"]$Rate <- a[Region == "upstream_50" & Gene == "MBL1"]$No.variants/a[Region == "upstream_50" & Gene == "MBL1"]$Sequenced
+##Adjust the upstream_50 total
+a[Region == "upstream_50" & Gene == "Total"]$No.variants <- sum(a[Region == "upstream_50" & Gene != "Total"]$No.variants)
 
 #Careful with subseting, the totals are NO LONGER ACCURATE!
 colec <- subset(a, a$Gene != "PGLYRP1a" & a$Gene != "PGLYRP1b" & a$Gene != "PGLYRP1x" & a$Gene != "PGLYRP2" & a$Gene != "PGLYRP3" & a$Gene != "PGLYRP4")
@@ -129,9 +140,6 @@ kruskal.test(region_list)
 
 
 
-##Output tables
-write.table(b, file="~/Desktop/table.txt", sep="\t", row.names = F, quote = F)
-
 
 ##Plots
 ## Bar plot of overall variation by gene
@@ -152,12 +160,15 @@ ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate)) +
   geom_jitter(aes(colour = Gene)) +
   theme_bw() +
   ylab("Rate (SNP/bp)") + 
-  xlab("")
+  xlab("") + 
+  scale_colour_viridis(discrete = T)
 
 ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate)) + 
   geom_boxplot() + 
   geom_jitter(aes(colour = Region)) +
-  geom_line(aes())
+  geom_line(aes()) +
   theme_bw() +
   ylab("Rate (SNP/bp)") +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+  
