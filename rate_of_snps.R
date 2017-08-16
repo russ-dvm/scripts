@@ -101,7 +101,22 @@ a[Region == "upstream_50" & Gene == "MBL1"]$Rate <- a[Region == "upstream_50" & 
 ##Adjust the upstream_50 total
 a[Region == "upstream_50" & Gene == "Total"]$No.variants <- sum(a[Region == "upstream_50" & Gene != "Total"]$No.variants)
 
-#Careful with subseting, the totals are NO LONGER ACCURATE!
+## The damn 5kb upstream is also off, since priority was given to the downstream 3 kb of SFTPA
+annotation_info <- data.table(annotation_info)
+mbl_5_end <- as.integer(annotation_info[feature == "upstream_5" & gene_name == "MBL1",]$feature_start) -1
+##For the start pos, take the "end" of the original upstream_5 and substract 5000 to get what it should've been
+mbl_5_start <- as.integer(annotation_info[feature == "upstream_5" & gene_name == "MBL1",]$feature_end) - 5000
+mbl_5_adjust <- mbl_5_end - mbl_5_start
+
+a[Region == "upstream_5" & Gene == "MBL1"]$Total <- a[Region == "upstream_5" & Gene == "MBL1"]$Total + mbl_5_adjust + 1
+mbl5_sequenced <- nrow(subset(annotated_depth, pos >= mbl_5_start & pos <= mbl_5_end))
+a[Region == "upstream_5" & Gene == "MBL1"]$Sequenced <- a[Region == "upstream_5" & Gene == "MBL1"]$Sequenced + mbl5_sequenced
+mbl5_var <- nrow(subset(annotated_depth, pos >= mbl_5_start & pos <= mbl_5_end & is_variant == T))
+a[Region == "upstream_5" & Gene == "MBL1"]$No.variants <- a[Region == "upstream_5" & Gene == "MBL1"]$No.variants + mbl5_var
+a[Region == "upstream_5" & Gene == "MBL1"]$Rate <- a[Region == "upstream_5" & Gene == "MBL1"]$No.variants/a[Region == "upstream_5" & Gene == "MBL1"]$Sequenced
+
+
+###Careful with subseting, the totals are NO LONGER ACCURATE!
 colec <- subset(a, a$Gene != "PGLYRP1a" & a$Gene != "PGLYRP1b" & a$Gene != "PGLYRP1x" & a$Gene != "PGLYRP2" & a$Gene != "PGLYRP3" & a$Gene != "PGLYRP4")
 pglyrp <- subset(a, a$Gene == "PGLYRP1a" | a$Gene == "PGLYRP1b" | a$Gene == "PGLYRP1x" | a$Gene == "PGLYRP2" | a$Gene == "PGLYRP3" | a$Gene == "PGLYRP4")
 
