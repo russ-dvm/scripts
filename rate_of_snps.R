@@ -98,8 +98,12 @@ a[Region == "upstream_5" & Gene == "MBL1"]$Rate <- a[Region == "upstream_5" & Ge
 
 ###Careful with subseting, the totals are NO LONGER ACCURATE!
 colec <- subset(a, a$Gene != "PGLYRP1a" & a$Gene != "PGLYRP1b" & a$Gene != "PGLYRP1x" & a$Gene != "PGLYRP2" & a$Gene != "PGLYRP3" & a$Gene != "PGLYRP4")
-pglyrp <- subset(a, a$Gene == "PGLYRP1a" | a$Gene == "PGLYRP1b" | a$Gene == "PGLYRP1x" | a$Gene == "PGLYRP2" | a$Gene == "PGLYRP3" | a$Gene == "PGLYRP4")
+# pglyrp <- subset(a, a$Gene == "PGLYRP1a" | a$Gene == "PGLYRP1b" | a$Gene == "PGLYRP1x" | a$Gene == "PGLYRP2" | a$Gene == "PGLYRP3" | a$Gene == "PGLYRP4")
 
+
+##Revalue the factors to something more interpretable (requires plyr)
+colec$Region <- revalue(colec$Region, c("downstream_3" = "Downstream 3 kb", "exon" = "Coding", "intron" = "Introns", "upstream_5" = "Upstream 5 kb", "upstream_50" = "Upstream 5-50 kb"))
+colec$Region <- factor(colec$Region, levels = c("Upstream 5-50 kb", "Upstream 5 kb", "Coding", "Introns", "Downstream 3 kb"))
 
 ####STATS####
 #Subset the data
@@ -150,7 +154,8 @@ ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate)) +
   theme_bw() +
   ylab("Rate (SNP/bp)") + 
   xlab("") + 
-  scale_colour_viridis(discrete = T)
+  scale_colour_viridis(discrete = T) + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
 ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate)) + 
   geom_boxplot() + 
