@@ -12,14 +12,6 @@ annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/next_version
 #no pglyrps and has fcn1-like.
 annotated_depth <- read.table("~/Desktop/results_utr_adjusted.txt", h=T, sep="\t")
 
-#Clean up the annotation_info - there are a few records that have "na-" in them - didn't want to lose the info, but also don't want to use it. Check rows before proceeding... Don't actually have to do this step, but it will generate warnings down the line.
-# 
-# annotation_info$feature_start[annotation_info$gene_name == "SFTPD"][17:18] <- NA
-# annotation_info$feature_end[annotation_info$gene_name == "SFTPD"][17:18] <- NA
-# annotation_info$feature_start[annotation_info$gene_name == "FCN3"][17:18] <- NA
-# annotation_info$feature_end[annotation_info$gene_name == "FCN3"][17:18] <- NA
-
-
 #Function to summarize the data into a dataframe.
 summarize <- function(info, data, depth){
 
@@ -69,19 +61,7 @@ summarize <- function(info, data, depth){
   return(output)
 }
 
-###I would argue that our variance rate will be elevated, because most estimates of the rate of variance are in the genome of one animal - our resolution maxes out at 3. So if you assume that some variants will be shared, and others not, then having multiple animals in a pool will result in a higher number of total variants, artifically elevating the rate. So, it is perhaps not useful to compare rates against other species, but rather between genes. So, for now, this is commented out and not pursued. Uncomment if you want to have a look at individual group stuff. 
-
-#Can have a look at the different group variation rate by importing an file annotated by the variants present in each group (split the variants in GATK first, then run the add_variants_to_... python script using each sub-vcf file)
-
-##Read in the group annotated files
-# file.list <- list.files(path="~/equine/2014_11_24/depth_of_regions/", pattern="annotated.g")
-# path="~/equine/2014_11_24/depth_of_regions/"
-# all_files <- paste(path, file.list, sep="")
-# group <- read.table("~/equine/2014_11_24/depth_of_regions/annotated.g5.txt", h=T, sep="\t")
-##The data is read in as a list of dataframes, one for each condition. Labels -must- be applied using the python script "assign_genes_to_plink_output.py" before hand. The filenames are not used here to impart information to the data frames.
-# all_groups <- lapply(all_files, read.table, h=T, sep="\t", stringsAsFactors=F)
-# 
-# b <- ldply(all_groups, summarize, info=annotation_info, depth=445)
+###I would argue that our variance rate will be elevated, because most estimates of the rate of variance are in the genome of one animal - our resolution maxes out at 3. So if you assume that some variants will be shared, and others not, then having multiple animals in a pool will result in a higher number of total variants, artifically elevating the rate. So, it is perhaps not useful to compare rates against other species, but rather between genes. 
 
 
 ##Apply the summarize function to the data
@@ -101,7 +81,7 @@ a[Region == "upstream_50" & Gene == "MBL1"]$Rate <- a[Region == "upstream_50" & 
 ##Adjust the upstream_50 total
 a[Region == "upstream_50" & Gene == "Total"]$No.variants <- sum(a[Region == "upstream_50" & Gene != "Total"]$No.variants)
 
-## The damn 5kb upstream is also off, since priority was given to the downstream 3 kb of SFTPA
+## The damn 5kb upstream is also off, since priority in the annotation file was given to the downstream 3 kb of SFTPA
 annotation_info <- data.table(annotation_info)
 mbl_5_end <- as.integer(annotation_info[feature == "upstream_5" & gene_name == "MBL1",]$feature_start) -1
 ##For the start pos, take the "end" of the original upstream_5 and substract 5000 to get what it should've been
@@ -121,8 +101,6 @@ colec <- subset(a, a$Gene != "PGLYRP1a" & a$Gene != "PGLYRP1b" & a$Gene != "PGLY
 pglyrp <- subset(a, a$Gene == "PGLYRP1a" | a$Gene == "PGLYRP1b" | a$Gene == "PGLYRP1x" | a$Gene == "PGLYRP2" | a$Gene == "PGLYRP3" | a$Gene == "PGLYRP4")
 
 
-
-
 ####STATS####
 #Subset the data
 #By Region:
@@ -139,7 +117,7 @@ gene_list <- list()
 for(gene in unique(a$Gene)){
   gene_list <- c(gene_list, list(subset(a, a$Gene == gene)$Rate))
 }
-gene_list
+
 
 ##Test each region for normality. low p-value indicates not normal.
 lapply(region_list, shapiro.test)
@@ -154,14 +132,10 @@ TukeyHSD(aov_genes)
 kruskal.test(region_list)
 
 
-
-
 ##Plots
 ## Bar plot of overall variation by gene
 ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6, fill = Region), stat="identity") + geom_bar(aes(y=Sequenced, fill = Region), stat="identity") + theme(axis.text.x = element_text(angle=90))
 
-# ggplot(b, aes(x=Region)) + geom_boxplot(aes(y=Rate)) + ylim(c(0,0.05))
-# ggplot(b, aes(x=Region, y=Rate, group=Gene)) + geom_bar(aes(fill = Gene), stat="identity", position="dodge") + theme(axis.text.x = element_text(angle=90)) + scale_colour_viridis(discrete = T) + theme_bw()
 
 ##Collectins only - box and bar plots, by region/gene
 ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
