@@ -3,14 +3,14 @@ library(viridis)
 library(plyr)
 library(data.table)
 
-annotation_info <- read.table("~/equine/2014_11_24/depth_of_regions/annotation_info.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F)
-annotation_info <- read.table("~/Desktop/annotation_info_utr_adjusted.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F, quote = "")
+annotation_info <- read.table("~/equine/2014_11_24/depth_of_regions/annotation_info_utr_adjusted.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F, quote = "")
+# annotation_info <- read.table("~/Desktop/annotation_info_utr_adjusted.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F, quote = "")
 
 #contains PGLYRPS
-annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/next_version.txt", h=T, sep="\t")
+# annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/next_version.txt", h=T, sep="\t")
 
 #no pglyrps and has fcn1-like.
-annotated_depth <- read.table("~/Desktop/results_utr_adjusted.txt", h=T, sep="\t")
+annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/results_utr_adjusted.txt", h=T, sep="\t")
 
 #Function to summarize the data into a dataframe.
 summarize <- function(info, data, depth){
@@ -66,7 +66,7 @@ summarize <- function(info, data, depth){
 
 ##Apply the summarize function to the data
 a <- summarize(annotation_info, annotated_depth, 445)
-a
+
 
 ## Adjust for MBL1 50kb, which overlaps with SFTPD and it's upstream region. At some point when time is abundant, maybe integrate this into the function... 
 mbl_50_start <- 88892827
@@ -101,27 +101,26 @@ colec <- subset(a, a$Gene != "PGLYRP1a" & a$Gene != "PGLYRP1b" & a$Gene != "PGLY
 # pglyrp <- subset(a, a$Gene == "PGLYRP1a" | a$Gene == "PGLYRP1b" | a$Gene == "PGLYRP1x" | a$Gene == "PGLYRP2" | a$Gene == "PGLYRP3" | a$Gene == "PGLYRP4")
 
 
-##Revalue the factors to something more interpretable (requires plyr)
-colec$Region <- revalue(colec$Region, c("downstream_3" = "Downstream 3 kb", "exon" = "Coding", "intron" = "Introns", "upstream_5" = "Upstream 5 kb", "upstream_50" = "Upstream 5-50 kb"))
-colec$Region <- factor(colec$Region, levels = c("Upstream 5-50 kb", "Upstream 5 kb", "Coding", "Introns", "Downstream 3 kb"))
+
 
 ####STATS####
 #Subset the data
 #By Region:
-exons <- subset(a, a$Region == "exon" & a$Gene != "Total")$Rate
-introns <- subset(a, a$Region == "intron" & a$Gene != "Total")$Rate
-downstream_3 <- subset(a, a$Region == "downstream_3" & a$Gene != "Total")$Rate
-upstream_5 <- subset(a, a$Region == "upstream_5" & a$Gene != "Total")$Rate
-upstream_50 <- subset(a, a$Region == "upstream_50" & a$Gene != "Total")$Rate
+
+exons <- subset(colec, colec$Region == "exon" & colec$Gene != "Total")$Rate
+introns <- subset(colec, colec$Region == "intron" & colec$Gene != "Total")$Rate
+downstream_3 <- subset(colec, colec$Region == "downstream_3" & colec$Gene != "Total")$Rate
+upstream_5 <- subset(colec, colec$Region == "upstream_5" & colec$Gene != "Total")$Rate
+upstream_50 <- subset(colec, colec$Region == "upstream_50" & colec$Gene != "Total")$Rate
 
 region_list <- list(exons, introns, downstream_3, upstream_5, upstream_50)
 
 #By gene:
 gene_list <- list()
-for(gene in unique(a$Gene)){
-  gene_list <- c(gene_list, list(subset(a, a$Gene == gene)$Rate))
+for(gene in unique(colec$Gene)){
+  gene_list <- c(gene_list, list(subset(colec, Gene == gene)$Rate))
 }
-
+names(gene_list) <- unique(colec$Gene)
 
 ##Test each region for normality. low p-value indicates not normal.
 lapply(region_list, shapiro.test)
@@ -130,13 +129,23 @@ lapply(gene_list, shapiro.test)
 ##Gene data is normal, but with only 5 observations is that reliable? 
 aov_genes <- aov(a$Rate ~ a$Gene)
 summary(aov_genes)
-TukeyHSD(aov_genes)
+tuk_genes <- TukeyHSD(aov_genes)
+plot(TukeyHSD(aov_genes))
+
+tuk_table <- data.table(tuk_genes[[1]], keep.rownames = T)
+colnames(tuk_table) <- c("rn", "diff", "lwr", "upr", "p")
+tuk_table[p<0.05]
 
 ##Region data is not normal. Test between regions can't use ANOVA, use non-parametric Kruskal-Wallis alternative.
-kruskal.test(region_list)
+kruskal.test(region_list
 
 
-##Plots
+###########Plots#########
+
+##Revalue the factors to something more interpretable (requires plyr). Makes the graphs nicer
+colec$Region <- revalue(colec$Region, c("downstream_3" = "Downstream 3 kb", "exon" = "Coding", "intron" = "Introns", "upstream_5" = "Upstream 5 kb", "upstream_50" = "Upstream 5-50 kb"))
+colec$Region <- factor(colec$Region, levels = c("Upstream 5-50 kb", "Upstream 5 kb", "Coding", "Introns", "Downstream 3 kb"))
+
 ## Bar plot of overall variation by gene
 ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6, fill = Region), stat="identity") + geom_bar(aes(y=Sequenced, fill = Region), stat="identity") + theme(axis.text.x = element_text(angle=90))
 
@@ -146,7 +155,8 @@ ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) +
   geom_bar(aes(fill = Region), stat="identity", position = "dodge") +
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  ylab("Rate (SNPs/kb)")
+  ylab("Rate (SNPs/kb)") +
+  scale_fill_viridis(discrete = T)
 
 ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate)) + 
   geom_boxplot() +
@@ -162,7 +172,19 @@ ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate)) +
   geom_jitter(aes(colour = Region)) +
   geom_line(aes()) +
   theme_bw() +
-  ylab("Rate (SNP/bp)") +
+  ylab("Number of variants per kb") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
-  
+
+######CHECKING GC CONTENT######
+gc <- read.table("~/equine/2014_11_24/gc_content/gc_content.txt", sep = "\t")
+mean(gc$V2)
+sd(gc$V2)
+
+detailed_gc <- read.table("~/equine/2014_11_24/gc_content/detailed_gc.txt", h = T, sep = "\t")
+ggplot(detailed_gc, aes(x=X5_usercol, y = X7_pct_gc)) + geom_boxplot() + geom_jitter() + xlab("") + ylab("Percent GC")
+#genes (coding regions) often have a higher GC content vs background genome
+ggplot(detailed_gc, aes(x=X4_usercol, y = X7_pct_gc)) + geom_violin() + xlab("") + ylab("Percent GC")
+
+dgc <- data.table(detailed_gc)
+mean(dgc[X4_usercol == "FCN1-like"]$X7_pct_gc)
