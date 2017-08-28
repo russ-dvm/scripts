@@ -137,7 +137,7 @@ colnames(tuk_table) <- c("rn", "diff", "lwr", "upr", "p")
 tuk_table[p<0.05]
 
 ##Region data is not normal. Test between regions can't use ANOVA, use non-parametric Kruskal-Wallis alternative.
-kruskal.test(region_list
+kruskal.test(region_list)
 
 
 ###########Plots#########
@@ -167,7 +167,7 @@ ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate)) +
   scale_colour_viridis(discrete = T) + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
-ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate)) + 
+ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
   geom_boxplot() + 
   geom_jitter(aes(colour = Region)) +
   geom_line(aes()) +
@@ -177,14 +177,20 @@ ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate)) +
 
 
 ######CHECKING GC CONTENT######
-gc <- read.table("~/equine/2014_11_24/gc_content/gc_content.txt", sep = "\t")
-mean(gc$V2)
-sd(gc$V2)
+gc <- read.table("~/equine/2014_11_24/gc_content/gene_gc/summary.gc", sep = "\t")
+colnames(gc) <- c("gene", "pct_gc")
+tstv <- read.table("~/equine/2014_11_24/gc_content/gene_tstv/summary.tstv")
+colnames(tstv) <- c("gene", "tstv")
 
-detailed_gc <- read.table("~/equine/2014_11_24/gc_content/detailed_gc.txt", h = T, sep = "\t")
-ggplot(detailed_gc, aes(x=X5_usercol, y = X7_pct_gc)) + geom_boxplot() + geom_jitter() + xlab("") + ylab("Percent GC")
-#genes (coding regions) often have a higher GC content vs background genome
-ggplot(detailed_gc, aes(x=X4_usercol, y = X7_pct_gc)) + geom_violin() + xlab("") + ylab("Percent GC")
+merged <- merge(gc, tstv)
+merged_sorted <- merged[order(merged$pct_gc),]
 
-dgc <- data.table(detailed_gc)
-mean(dgc[X4_usercol == "FCN1-like"]$X7_pct_gc)
+ggplot(merged_sorted, aes(x=tstv, y = pct_gc)) + geom_point() + geom_smooth(method = lm)
+cor(merged$gc, merged$tstv)
+
+########INDEL VS SNP###########
+ind_snp <- read.table("~/equine/2014_11_24/gc_content/gene_vcfs/summary.txt", sep = "\t")
+test <- fread("~/equine/2014_11_24/gc_content/gene_vcfs/summary.txt", sep = "\t")
+ind_snp_spread <- spread(ind_snp, V2, V3)
+ind_snp_spread$ratio <- ind_snp_spread$indel/ind_snp_spread$snp
+
