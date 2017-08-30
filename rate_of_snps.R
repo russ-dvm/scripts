@@ -11,6 +11,7 @@ annotation_info <- read.table("~/equine/2014_11_24/depth_of_regions/annotation_i
 
 #no pglyrps and has fcn1-like.
 annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/results_utr_adjusted.txt", h=T, sep="\t")
+annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/results_utr_adjusted_aug30.txt", h=T, sep="\t")
 
 #Function to summarize the data into a dataframe.
 summarize <- function(info, data, depth){
@@ -68,7 +69,8 @@ summarize <- function(info, data, depth){
 a <- summarize(annotation_info, annotated_depth, 445)
 
 
-## Adjust for MBL1 50kb, which overlaps with SFTPD and it's upstream region. At some point when time is abundant, maybe integrate this into the function... 
+##########ADJUSTMENTS#############
+### Adjust for MBL1 50kb, which overlaps with SFTPD and it's upstream region. At some point when time is abundant, maybe integrate this into the function... 
 mbl_50_start <- 88892827
 mbl_50_end <- 88928053
 a <- data.table(a)
@@ -122,6 +124,12 @@ for(gene in unique(colec$Gene)){
 }
 names(gene_list) <- unique(colec$Gene)
 
+gene_list[["FCN3"]][5] <- 0
+gene_avg <- lapply(gene_list, mean)
+gene_avg_df <- ldply(gene_avg, data.frame)
+colnames(gene_avg_df) <- c("gene", "avg_var")
+gene_avg_df$avg_var_per_kb <- gene_avg_df$avg_var * 1000
+
 ##Test each region for normality. low p-value indicates not normal.
 lapply(region_list, shapiro.test)
 lapply(gene_list, shapiro.test)
@@ -140,7 +148,7 @@ tuk_table[p<0.05]
 kruskal.test(region_list)
 
 
-###########Plots#########
+###########PLOTS#########
 
 ##Revalue the factors to something more interpretable (requires plyr). Makes the graphs nicer
 colec$Region <- revalue(colec$Region, c("downstream_3" = "Downstream 3 kb", "exon" = "Coding", "intron" = "Introns", "upstream_5" = "Upstream 5 kb", "upstream_50" = "Upstream 5-50 kb"))
@@ -155,14 +163,14 @@ ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) +
   geom_bar(aes(fill = Region), stat="identity", position = "dodge") +
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  ylab("Rate (SNPs/kb)") +
+  ylab("Number of variants per kb") +
   scale_fill_viridis(discrete = T)
 
-ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate)) + 
+ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate*1000)) + 
   geom_boxplot() +
   geom_jitter(aes(colour = Gene)) +
   theme_bw() +
-  ylab("Rate (SNP/bp)") + 
+  ylab("Number of variants per kb") + 
   xlab("") + 
   scale_colour_viridis(discrete = T) + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
@@ -193,4 +201,8 @@ ind_snp <- read.table("~/equine/2014_11_24/gc_content/gene_vcfs/summary.txt", se
 test <- fread("~/equine/2014_11_24/gc_content/gene_vcfs/summary.txt", sep = "\t")
 ind_snp_spread <- spread(ind_snp, V2, V3)
 ind_snp_spread$ratio <- ind_snp_spread$indel/ind_snp_spread$snp
+ggplot(ind_snp_spread, aes(x = indel, y = snp)) + geom_point(aes(colour = V1, shape = V1, size = 4)) + geom_smooth(method = lm) +
+  scale_shape_manual(values = c(3:19))
 
+cor(ind_snp_spread$snp, ind_snp_spread$indel)
+## Strong correlation between SNPs and INDELs, which supports the thoery that there are more point mutations in areas that have more INDELs... 
