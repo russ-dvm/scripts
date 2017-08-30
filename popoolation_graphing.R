@@ -2,14 +2,14 @@ library(ggplot2)
 library(viridis)
 library(ggforce)
 
+###See "gg-qqman.R" for alternative script that plots with proper chrom widths, and the ability to zoom in on a specific region.
+
+
 #BOVINE
 #popoolation <- read.table("~/bovine/merged_runs/popoolation/subsampled200-no-na.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
 
 #EQUINE
-popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled200-tabbed.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
-popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled340.ready.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
-popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled200.ready.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
-popoolation <- read.table("~/equine/2014_11_24/popoolation/temp.txt", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
+popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled370.ready.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
 
 
 ###Determine BH significance levels
@@ -26,7 +26,7 @@ sorted.by.p$rank <- c(1:rownum)
 sorted.by.p$actual.p <- 10^(-sorted.by.p$invlogp)
 
 #set the false discovery rate
-fdr = 0.01																
+fdr = 0.000001																
 
 #calculate the benjamini hochberg critical value - the integer = False Discovery Rate
 benj.hoch <- (sorted.by.p$rank/rownum)*fdr 		
