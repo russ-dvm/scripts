@@ -49,8 +49,7 @@ bmt <- BiomartGeneRegionTrack(genome = "EquCab2", stacking = "squish", biomart =
 ####SIMPLE graph - plots the total number of variants without any annotation
 ####COMPLICATED graph - colours the histogram according to the different variant types. Note that because SnpEff annotates based on the information for multiple genes, the annotation with respect to OUR gene of interest is sometimes incorrect. E.g. for the Ficolins, you may have a SNP labeled as "downstream" when it is in fact an intron snp - this is because the snp occurs downstream of a gene that is within 5kb of the FCN...Anyways, can use the "feature" info of the annotated_depth DF to correct this, I think. Use the SnpEff info for better annotation on non-synonymous codingifelse variant...
 ##Simple
-annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/results_utr_adjusted.txt", h=T, sep="\t")
-annotated_depth <- read.table("~/Desktop/annotated_depth_and_variants.txt", h=T, sep="\t")
+annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/results_utr_adjusted_aug30.txt", h=T, sep="\t")
 ##Keep only variants
 annotated_depth_variants <- annotated_depth[annotated_depth$is_variant == T,]
 ##Slim down the table
