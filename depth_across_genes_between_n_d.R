@@ -31,10 +31,10 @@ diseased <- c("group7", "group8", "group9", "group10", "group11", "group12", "gr
 for (i in 1:nrow(mean_depths_gathered)){
   gname <- mean_depths_gathered$group[i]
   if (gname %in% diseased){
-    mean_depths_gathered$status[i] <- "diseased"
+    mean_depths_gathered$Population[i] <- "infectious"
   }
   else{
-    mean_depths_gathered$status[i] <- "healthy"
+    mean_depths_gathered$Population[i] <- "non-infectious"
   }
 }
 
@@ -62,10 +62,12 @@ res
 
 #####PLOTS
 ggplot(mean_depths_gathered, aes(x = gene, y = avg)) +
-  geom_boxplot(aes(fill = status)) +
-  theme_classic() +
-  scale_fill_grey(start = 0.5) + 
+  geom_boxplot(aes(fill = Population)) +
+  theme_bw() +
+  scale_fill_grey(start = 0.5) +
   ylab("Average read depth across all groups within a population") +
   xlab("") +
-  theme(axis.text.x = element_text(hjust = 1, angle = 60))
-       
+  theme(axis.text.x = element_text(hjust = 1, angle = 60)) +
+  theme(legend.position = c(0,1), legend.justification = c(0,1)) +
+  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3))
+

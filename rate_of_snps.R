@@ -69,7 +69,7 @@ summarize <- function(info, data, depth){
 a <- summarize(annotation_info, annotated_depth, 445)
 
 
-##########ADJUSTMENTS#############
+####ADJUSTMENTS####
 ### Adjust for MBL1 50kb, which overlaps with SFTPD and it's upstream region. At some point when time is abundant, maybe integrate this into the function... 
 mbl_50_start <- 88892827
 mbl_50_end <- 88928053
@@ -99,7 +99,7 @@ a[Region == "upstream_5" & Gene == "MBL1"]$Rate <- a[Region == "upstream_5" & Ge
 
 
 ###Careful with subseting, the totals are NO LONGER ACCURATE!
-colec <- subset(a, a$Gene != "PGLYRP1a" & a$Gene != "PGLYRP1b" & a$Gene != "PGLYRP1x" & a$Gene != "PGLYRP2" & a$Gene != "PGLYRP3" & a$Gene != "PGLYRP4")
+colec <- subset(a, a$Gene != "PGLYRP1a" & a$Gene != "PGLYRP1b" & a$Gene != "PGLYRP1x" & a$Gene != "PGLYRP2" & a$Gene != "PGLYRP3" & a$Gene != "PGLYRP4" & a$Gene != "Total")
 # pglyrp <- subset(a, a$Gene == "PGLYRP1a" | a$Gene == "PGLYRP1b" | a$Gene == "PGLYRP1x" | a$Gene == "PGLYRP2" | a$Gene == "PGLYRP3" | a$Gene == "PGLYRP4")
 
 
@@ -115,14 +115,16 @@ downstream_3 <- subset(colec, colec$Region == "downstream_3" & colec$Gene != "To
 upstream_5 <- subset(colec, colec$Region == "upstream_5" & colec$Gene != "Total")$Rate
 upstream_50 <- subset(colec, colec$Region == "upstream_50" & colec$Gene != "Total")$Rate
 
-region_list <- list(exons, introns, downstream_3, upstream_5, upstream_50)
+region_list <- list("exons" = exons, "introns" = introns, "downstream_3" = downstream_3, "upstream_5" = upstream_5, "upstream_50" = upstream_50)
 
 #By gene:
 gene_list <- list()
 for(gene in unique(colec$Gene)){
+  if (gene == "Total"){}
+  else{
   gene_list <- c(gene_list, list(subset(colec, Gene == gene)$Rate))
-}
-names(gene_list) <- unique(colec$Gene)
+}}
+names(gene_list) <- unique(colec$Gene)[c(1:12)]
 
 gene_list[["FCN3"]][5] <- 0
 gene_avg <- lapply(gene_list, mean)
@@ -144,11 +146,22 @@ tuk_table <- data.table(tuk_genes[[1]], keep.rownames = T)
 colnames(tuk_table) <- c("rn", "diff", "lwr", "upr", "p")
 tuk_table[p<0.05]
 
-##Region data is not normal. Test between regions can't use ANOVA, use non-parametric Kruskal-Wallis alternative.
+##Region data is not normal. Test between regions shouldn't use ANOVA, use non-parametric Kruskal-Wallis alternative.
+region_list[[5]][2] <- 0
+
 kruskal.test(region_list)
 
+## AOV for brandon 
+aov_region <- aov(a$Rate ~ a$Region)
+summary(aov_region)
+tuk_regions <- TukeyHSD(aov_region)
+tuk_regions
+plot(tuk_regions)
 
-###########PLOTS#########
+lapply(region_list, mean)
+
+
+####PLOTS####
 
 ##Revalue the factors to something more interpretable (requires plyr). Makes the graphs nicer
 colec$Region <- revalue(colec$Region, c("downstream_3" = "Downstream 3 kb", "exon" = "Coding", "intron" = "Introns", "upstream_5" = "Upstream 5 kb", "upstream_50" = "Upstream 5-50 kb"))
@@ -158,13 +171,24 @@ colec$Region <- factor(colec$Region, levels = c("Upstream 5-50 kb", "Upstream 5 
 ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6, fill = Region), stat="identity") + geom_bar(aes(y=Sequenced, fill = Region), stat="identity") + theme(axis.text.x = element_text(angle=90))
 
 
-##Collectins only - box and bar plots, by region/gene
+## Collectins only - box and bar plots, by region/gene
 ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
   geom_bar(aes(fill = Region), stat="identity", position = "dodge") +
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   ylab("Number of variants per kb") +
-  scale_fill_viridis(discrete = T)
+  scale_fill_viridis(discrete = T) +
+  theme(legend.position = c(1,1), legend.justification= c(1,1)) +
+  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3))
+
+ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate*1000)) + 
+  geom_bar(aes(fill = Gene), stat="identity", position = "dodge") +
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  ylab("Number of variants per kb") +
+  scale_fill_viridis(discrete = T) +
+  # theme(legend.position = c(1,1), legend.justification= c(1,1)) +
+  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3))
 
 ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate*1000)) + 
   geom_boxplot() +
@@ -178,13 +202,14 @@ ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate*1000)) +
 ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
   geom_boxplot() + 
   geom_jitter(aes(colour = Region)) +
-  geom_line(aes()) +
   theme_bw() +
   ylab("Number of variants per kb") +
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  theme(legend.position = c(1,1), legend.justification= c(1,1)) +
+  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3)) +
+  scale_colour_viridis(discrete = T)
 
-
-######CHECKING GC CONTENT######
+####CHECKING GC CONTENT####
 gc <- read.table("~/equine/2014_11_24/gc_content/gene_gc/summary.gc", sep = "\t")
 colnames(gc) <- c("gene", "pct_gc")
 tstv <- read.table("~/equine/2014_11_24/gc_content/gene_tstv/summary.tstv")
@@ -196,7 +221,7 @@ merged_sorted <- merged[order(merged$pct_gc),]
 ggplot(merged_sorted, aes(x=tstv, y = pct_gc)) + geom_point() + geom_smooth(method = lm)
 cor(merged$gc, merged$tstv)
 
-########INDEL VS SNP###########
+####INDEL VS SNP####
 ind_snp <- read.table("~/equine/2014_11_24/gc_content/gene_vcfs/summary.txt", sep = "\t")
 test <- fread("~/equine/2014_11_24/gc_content/gene_vcfs/summary.txt", sep = "\t")
 ind_snp_spread <- spread(ind_snp, V2, V3)

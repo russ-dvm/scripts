@@ -24,6 +24,13 @@ chr <- 25
 # name <- "FCN-1-like"
 # chr <- 25
 
+## COLLECTIN LOCUS
+start <- 88892979
+end <-  89006643
+name <- "collectin locus"
+chr <- 1
+
+
 ##Gtrack - genome track. Displays the coordinates of the genome.
 gtrack <- GenomeAxisTrack()
 
@@ -42,6 +49,9 @@ equcab_mart = useMart("ensembl", dataset="ecaballus_gene_ensembl")
 
 ##Now make sure to include the "mart" option in the following, with mart = equcab_mart
 bmt <- BiomartGeneRegionTrack(genome = "EquCab2", stacking = "squish", biomart = equcab_mart, name = name, gene = c("ENSECAG00000000436", "ENSECAG00000024620"))
+
+## COLLECTIN LOCUS
+bmt <- BiomartGeneRegionTrack(genome = "EquCab2", stacking = "squish", biomart = equcab_mart, name = name, gene = c("ENSECAG00000023001", "ENSECAG00000018357", "ENSECAG00000018767", "ENSECAG00000006706"), min.height=1)
 
 ##The "histogram" track really appears to be more of a bargraph to me. I cannot get it to plot frequencies/counts, just absolute values... so not really sure. I did post in the Bioconductors forum about this with no response. https://support.bioconductor.org/p/98774/ 
 ##Decided to try an alternate strategy: use the annotated_variant dataset generated for "rate_of_snps.R" and see if I can summarize and then convert it into a GRanges object, so that the bargraph/"histogram" will actually represent what we want.
@@ -141,4 +151,9 @@ var_track <- DataTrack(var_grange, name = "Variants", type = "histogram", chromo
 plotTracks(c(itrack, gtrack, bmt, var_track, dtrack, strack), from = start, to = end, min.height = 5)
 plotTracks(c(itrack, gtrack, bmt, var_track, strack), from = start, to = end, min.height = 5)
 
+plotTracks(c(gtrack, bmt, itrack), from = start, to = end)
+a
 
+ggdata <- data.frame("sample"=as.factor(c(1:10)), "value"=as.numeric(seq(1,100,by=10)))
+c<-ggplot(ggdata,aes(x=sample, y=value)) + geom_point()
+layou(matrix(c))

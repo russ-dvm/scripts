@@ -3,6 +3,9 @@ library(qqman)
 library(viridis)
 library(ggforce)
 
+#######
+#NB: this script no longer in use; has been ported over to popoolation_table_of_frequencies.R
+#######
 
 ###STEPHEN TURNER'S CODE FROM 
 ## https://github.com/stephenturner/qqman/blob/master/R/manhattan.R
@@ -117,7 +120,7 @@ manhattan <- function(x, chr="CHR", bp="BP", p="P", snp="SNP",
 
 ####IMPORT DATA
 ## Raw equine data
-popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled370.ready.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
+popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled370.17-08-31.ready.no-pglyrp.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
 start_stop <- read.table("~/equine/2014_11_24/popoolation/start_stop_for_qqman.txt", sep = "\t", h = T)
 
 ## Reformat for qqman -- expects three columns, Chr, Bp, P, and SNP-id
@@ -140,9 +143,8 @@ rownum <- nrow(sorted.by.p)
 sorted.by.p$rank <- c(1:rownum) 										
 #set the false discovery rate
 fdr = 0.000001																
-#calculate the benjamini hochberg critical value - the integer = False Discovery Rate
+#calculate the benjamini hochberg critical value
 benj.hoch <- (sorted.by.p$rank/rownum)*fdr 		
-
 #add benjamini hochbergs to the data frame
 sorted.by.p$bh <- benj.hoch 							
 #determine significant (i.e. is the p value less than the BH critical value?)
@@ -157,6 +159,9 @@ all.significant <- subset(sorted.by.p, significant == TRUE)
 #Take the last significant one (i.e. highest rank)
 lowest.significant <- tail(all.significant, 1)	
 lowest.significant.row <- lowest.significant$rank
+
+#Make sure all rows above the lowest row are considered significant
+sorted.by.p[1:lowest.significant.row,]$significant <- TRUE
 
 #inverse log of the p-value of highest ranked sig value
 intercept <- lowest.significant$P				

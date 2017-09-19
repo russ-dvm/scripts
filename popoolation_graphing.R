@@ -9,10 +9,11 @@ library(ggforce)
 #popoolation <- read.table("~/bovine/merged_runs/popoolation/subsampled200-no-na.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
 
 #EQUINE
-popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled370.ready.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
+popoolation <- read.table("~/equine/2014_11_24/popoolation/subsampled370.17-08-31.ready.no-pglyrp.fet", col.names=c("Chrom", "Position", "A", "B", "C", "Pop", "invlogp"))
 
 
 ###Determine BH significance levels
+## Turns out there's a function in base R that does BH procedure.. who knew. p.adjust(p, "BH") gives me what I want... gah.
 #order data by p value, from lowest to highest
 sorted.by.p <- popoolation[order(popoolation$invlogp, decreasing=T),]	
 
@@ -90,7 +91,8 @@ write.table(sig_only, file = "~/Desktop/sig-only200.txt", quote = F, sep = "\t",
 
 ggplot(sorted.by.p) + 
   geom_jitter(aes(x=Chromosome, y=invlogp, color=Chromosome), width=0.49) + 
-  facet_zoom(x=Chromosome=='chr10') + theme_bw() + 
+  facet_zoom(x=Chromosome=='chr10') + 
+  theme_bw() + 
   xlab("") + 
   ylab('Inv log (P)') + 
   theme(legend.position="none") + 
