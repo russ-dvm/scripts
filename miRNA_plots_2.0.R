@@ -1,5 +1,6 @@
 library(ggplot2)
 library(ggpubr)
+library(data.table)
 
 #### IMPORT DATA ####
 mirna_seed <- read.table("~/equine/2014_11_24/miRNA/combined_by_mir_overlap/overlap.snps.seed.named.txt", sep = "\t")
@@ -51,7 +52,7 @@ simple <- rbind(simple, missing)
 
 simple$Gene <- factor(simple$Gene, levels = c("COLEC10", "COLEC11", "COLEC12", "FCN1", "FCN1-like", "FCN3", "MASP1", "MASP2", "MBL1", "MBL2", "SFTPA1", "SFTPD"))
 
-ggplot(simple, aes(x = Gene)) + 
+fig3 <- ggplot(simple, aes(x = Gene)) + 
   geom_histogram(aes(fill = type), stat = "count", position = "dodge") +
   theme_bw() +
   xlab("") +
@@ -66,8 +67,18 @@ ggplot(simple, aes(x = Gene)) +
   ylab("Number of variants") +
   ggtitle("") +
   theme(legend.position = c(1,1), legend.justification= c(1,1)) +
-  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.25))
+  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.25)) + 
+  theme(text = element_text(size = 10)) +
+  theme(legend.text = element_text(size = 10), legend.title = element_text(size = 10))
     
+fig3
+ggsave("~/Dropbox/temp/figure_3.eps", fig3, units = "mm" , height = 100, width = 90, dpi = 1000)
+
+## Supp table 4
+sup4 <- data.frame("Gene" = factor(mirna_ann$V32), "Chrom" = factor(mirna_ann$V1), "Position" = factor(mirna_ann$V2), "Ref" = factor(mirna_ann$V4), "Alt" = factor(mirna_ann$V5), "miRNA" = factor(mirna_ann$V31), "MRE Location" = factor(mirna_ann$V34))
+
+sup4$Chrom <- gsub("chr", "", sup4$Chrom)
+write.table(sup4, "~/Dropbox/temp/sup4.txt", row.names=F, quote=F, sep="\t")
 
 #### COMP TO TOTAL NUM OF SNPS
 ## Run "rate_of_snps.R" to get the colec table

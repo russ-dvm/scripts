@@ -182,21 +182,21 @@ ggplot(d) +
   theme_bw() +
   theme(panel.grid.minor.x = element_line(colour = "light grey"), panel.grid.major.x = element_blank()) +
   theme(panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank()) +
-    ylab("-log(p)") + 
-  theme(axis.text.x=element_text(angle = 60, hjust=1, size=9), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15), legend.position = "none") + 
+  ylab("-log(p)") + 
+  xlab("") +
+  theme(axis.text.x=element_text(angle = 60, hjust=1), legend.title=element_blank(), legend.position = "none") + 
   scale_color_viridis(discrete=T) + 
   geom_hline(yintercept=-log10(intercept), colour="red") + 
+  theme(text = element_text(size = 10)) +
   scale_x_continuous(minor_breaks = minor_ticks, breaks = ticks, labels = labs) +
   # scale_x_continuous(breaks=c(ticks), labels=labs) #+
   facet_zoom(x=CHR==1)+ facet_zoom(x=CHR==1 & BP > 88892979 & BP < 89006643)
   
-sig_only <- subset(sorted.by.p, sorted.by.p$significant == T)
-nrow(sig_only)
+
+
+# sig_only <- subset(sorted.by.p, sorted.by.p$significant == T)
+# nrow(sig_only)
 
 # ggsave("~/Dropbox/chrom.svg")
-
-# x=CHR==1 & BP > 88892979 & BP < 89006643
-# x=CHR==8 & BP > 40893025 & BP < 41121736
-
 #scale_color_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange"))
 

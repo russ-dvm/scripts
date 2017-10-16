@@ -251,36 +251,88 @@ sorted.by.p[1:lowest.significant.row,]$significant <- TRUE
 intercept <- lowest.significant$P				
 
 
+## Add the R padjust to the data frame
+d$rp <- p.adjust(d$P, method = "BH")
+
 ####Change the chroms from numeric to factors, for colouring purposes.
 d$CHR <- as.factor(d$CHR)
 
-
+## Collectin locus gene coords
+colec <- c(88892979, 88922677,88925052,88932901,88935579,88947828,88956555, 89006643)
 
 ##GGPLOT MOD BY RUSSELL FRASER
 #scale_x_continous seems to break the x-axis of the facet_zoom
 #There's probably a smart workaround, but for now, the best I can come up with is saving a copy of the graph with
 # and without the sacle_x_continous as SVG and then merging the two. 
 
-ggplot(d) + 
-  geom_point(aes(x=pos, y=logp, color=CHR)) + 
+fig <- ggplot(d) + 
+  geom_point(aes(x=pos, y=-log10(rp), color=CHR)) + 
   theme_bw() +
   theme(panel.grid.minor.x = element_line(colour = "light grey"), panel.grid.major.x = element_blank()) +
   theme(panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank()) +
   ylab("-log(p)") + 
-  theme(axis.text.x=element_text(angle = 60, hjust=1, size=9), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15), legend.position = "none") + 
-  scale_color_viridis(discrete=T) + 
+  xlab("") +
+  theme(axis.text.x=element_text(angle = 60, hjust=1), legend.title=element_blank(), legend.position = "none") + 
+  theme(text = element_text(size = 10)) +
+  scale_colour_manual(values = g_col) + 
   geom_hline(yintercept=-log10(intercept), colour="red") + 
-  scale_x_continuous(minor_breaks = minor_ticks, breaks = ticks, labels = labs) +
-  # scale_x_continuous(breaks=c(ticks), labels=labs) #+
   facet_zoom(x=CHR==1)+ facet_zoom(x=CHR==1 & BP > 88892979 & BP < 89006643)
+
+fig_a <- fig + 
+  scale_x_continuous(minor_breaks = minor_ticks, breaks = ticks, labels = labs)
+  
+fig_b <- fig +
+  scale_x_continuous(minor_breaks = colec, breaks = colec, labels = c("88892979", "SFTPA1", "", "MBL1", "", "SFTPD", "", "89006643"))
+
+fig_a
+fig_b
+
+ggsave("~/Dropbox/temp/figure_4a.eps", fig_a, dpi = 1000, units = "mm", width = 190, height = 100)
+ggsave("~/Dropbox/temp/figure_4b.eps", fig_b, dpi = 1000, units = "mm", width = 190, height = 100)
+
 
 sig_only <- subset(sorted.by.p, sorted.by.p$significant == T)
 nrow(sig_only)
 
 # ggsave("~/Dropbox/chrom.svg")
+# scale_x_continuous(breaks=c(ticks), labels=labs) +
+write.table(d, "~/Dropbox/temp/tmp.txt", row.names = F, sep = "\t", quote = F)
 
-# x=CHR==1 & BP > 88892979 & BP < 89006643
-# x=CHR==8 & BP > 40893025 & BP < 41121736
 
-#scale_color_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange"))
 
+
+
+
+
+eg_col <- c(
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey27",
+  "grey67", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey67", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey27",
+  "grey27", 
+  "grey67",
+  "grey27", 
+  "grey67",
+  "grey27")

@@ -1,7 +1,8 @@
 library(tidyverse)
-library(viridis)
 library(plyr)
 library(data.table)
+library(ggpubr)
+library(gridExtra)
 
 annotation_info <- read.table("~/equine/2014_11_24/depth_of_regions/annotation_info_utr_adjusted.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F, quote = "")
 # annotation_info <- read.table("~/Desktop/annotation_info_utr_adjusted.bed", h=T, sep="\t", na.strings = "na", stringsAsFactors = F, quote = "")
@@ -167,47 +168,87 @@ lapply(region_list, mean)
 colec$Region <- revalue(colec$Region, c("downstream_3" = "Downstream 3 kb", "exon" = "Coding", "intron" = "Introns", "upstream_5" = "Upstream 5 kb", "upstream_50" = "Upstream 5-50 kb"))
 colec$Region <- factor(colec$Region, levels = c("Upstream 5-50 kb", "Upstream 5 kb", "Coding", "Introns", "Downstream 3 kb"))
 
+##Fix the NA value 
+colec[Gene == "FCN3" & Sequenced == 0]$Rate <- 0
+
 ## Bar plot of overall variation by gene
-ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6, fill = Region), stat="identity") + geom_bar(aes(y=Sequenced, fill = Region), stat="identity") + theme(axis.text.x = element_text(angle=90))
+# ggplot(subset(a, a$Gene != "Total"), aes(x=Gene)) + geom_bar(aes(y=Total, alpha = 0.6, fill = Region), stat="identity") + geom_bar(aes(y=Sequenced, fill = Region), stat="identity") + theme(axis.text.x = element_text(angle=90))
 
 
 ## Collectins only - box and bar plots, by region/gene
-ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
-  geom_bar(aes(fill = Region), stat="identity", position = "dodge") +
-  theme_bw() + 
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  ylab("Number of variants per kb") +
-  scale_fill_viridis(discrete = T) +
-  theme(legend.position = c(1,1), legend.justification= c(1,1)) +
-  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3))
+# 
+# ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate*1000)) +
+#   geom_bar(aes(fill = Gene), stat="identity", position = "dodge") +
+#   theme_bw() +
+#   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+#   ylab("Number of variants per kb") +
+#   scale_fill_grey() +
+#   # theme(legend.position = c(1,1), legend.justification= c(1,1)) +
+#   theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3)) +
+#   theme(legend.text = element_text(face = "italic", size = 7), legend.title = element_text(size = 7)) +
+#   theme(legend.position = c(1,1), legend.justification= c(1,1))
+#   
+# ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
+#   geom_bar(aes(fill = Region), stat="identity", position = "dodge") +
+#   theme_bw() + 
+#   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+#   ylab("Number of variants per kb") +
+#   xlab("") +
+#   scale_fill_grey() +
+#   theme(legend.position = c(1,1), legend.justification= c(1,1)) +
+#   theme(legend.text = element_text(size = 7), legend.title = element_text(size = 7)) + 
+#   theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3)) +
+#   ggtitle("b)") + 
+#   theme(plot.title = element_text(hjust = -0.14, size = 10))
 
-ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate*1000)) + 
-  geom_bar(aes(fill = Gene), stat="identity", position = "dodge") +
-  theme_bw() + 
-  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  ylab("Number of variants per kb") +
-  scale_fill_viridis(discrete = T) +
-  # theme(legend.position = c(1,1), legend.justification= c(1,1)) +
-  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3))
 
-ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate*1000)) + 
-  geom_boxplot() +
-  geom_jitter(aes(colour = Gene)) +
-  theme_bw() +
-  ylab("Number of variants per kb") + 
-  xlab("") + 
-  scale_colour_viridis(discrete = T) + 
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 
-ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
+a <- ggplot(subset(colec, colec$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
   geom_boxplot() + 
-  geom_jitter(aes(colour = Region)) +
+  theme(text = element_text(size = 10)) +
+  stat_summary(fun.y = mean, colour = "grey", geom = "text", label = "----") +
   theme_bw() +
   ylab("Number of variants per kb") +
+  xlab("") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  theme(legend.position = c(1,1), legend.justification= c(1,1)) +
-  theme(legend.background = element_rect(fill = "white", linetype = "solid", colour = "black", size = 0.3)) +
-  scale_colour_viridis(discrete = T)
+  annotate("text", label = "*", x = 4, y = 32.5, size = 6) +
+  annotate("text", label = "*", x = 5, y = 36, size = 6) +
+  ggtitle("a)") +
+  theme(plot.title = element_text(hjust = -0.14, size = 10)) +
+  theme(panel.grid.major.x = element_blank(), panel.grid.minor.y = element_blank())
+a
+
+b<- ggplot(subset(colec, colec$Gene != "Total"), aes(x = Region, y = Rate*1000)) +
+  geom_boxplot() +
+  theme_bw() +
+  ylab("Number of variants per kb") +
+  xlab("") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  stat_summary(fun.y = mean, colour = "grey", geom = "text", label = "----", size = 8) +
+  ggtitle("b)") + 
+  theme(plot.title = element_text(hjust = -0.14, size = 10)) +
+  theme(panel.grid.major.x = element_blank(), panel.grid.minor.y = element_blank())
+
+
+grid.arrange(a, b, ncol = 2)
+
+## Convoluted way to get the plots to be the same height (gridarrange was not doin the trick) ** ONLY needed if both boxplots are used. the Bar plot is no problemo.
+## convert plots to gtable objects
+library(gtable)
+library(grid) # low-level grid functions are required
+g1 <- ggplotGrob(a)
+g2 <- ggplotGrob(b)
+g <- cbind(g1, g2, size="first") # stack the two plots
+# g$heights <- unit.pmin(g1$heights, g2$heights) # use the smallest heights
+
+fig_size <- c(190, 100) # inches
+margin <- unit(1, "line")
+
+g$vp <- viewport(width = unit(fig_size[1], "mm"), height=unit(fig_size[2],"mm")- margin)
+
+library("Cairo")
+ggsave("~/Dropbox/temp/figure_2.pdf", g, width=fig_size[1], height=fig_size[2], units = "mm", dpi = 1000, device = cairo_pdf)
+
 
 ####CHECKING GC CONTENT####
 gc <- read.table("~/equine/2014_11_24/gc_content/gene_gc/summary.gc", sep = "\t")
@@ -221,9 +262,12 @@ merged_sorted <- merged[order(merged$pct_gc),]
 ggplot(merged_sorted, aes(x=tstv, y = pct_gc)) + geom_point() + geom_smooth(method = lm)
 cor(merged$gc, merged$tstv)
 
+sup5 <- gc
+colnames(sup5) <- c("Target Region", "Percent GC")
+sup5$`Target Region` <- c("COLEC10", "COLEC11", "COLEC12", "SFTPA, MBL1, SFTPD", "FCN3", "FCN1, FCN1-LIKE", "MASP1", "MASP2", "MBL2")
+
 ####INDEL VS SNP####
 ind_snp <- read.table("~/equine/2014_11_24/gc_content/gene_vcfs/summary.txt", sep = "\t")
-test <- fread("~/equine/2014_11_24/gc_content/gene_vcfs/summary.txt", sep = "\t")
 ind_snp_spread <- spread(ind_snp, V2, V3)
 ind_snp_spread$ratio <- ind_snp_spread$indel/ind_snp_spread$snp
 ggplot(ind_snp_spread, aes(x = indel, y = snp)) + geom_point(aes(colour = V1, shape = V1, size = 4)) + geom_smooth(method = lm) +
@@ -231,3 +275,13 @@ ggplot(ind_snp_spread, aes(x = indel, y = snp)) + geom_point(aes(colour = V1, sh
 
 cor(ind_snp_spread$snp, ind_snp_spread$indel)
 ## Strong correlation between SNPs and INDELs, which supports the thoery that there are more point mutations in areas that have more INDELs... 
+
+
+## SUPP TABLE 5
+sup5
+colnames(ind_snp_spread) <- c("Target Region", "INDEL", "SNV", "Ratio")
+ind_snp_spread$`Target Region` <-  c("COLEC10", "COLEC11", "COLEC12", "SFTPA, MBL1, SFTPD", "FCN1, FCN1-LIKE", "FCN3", "MASP1", "MASP2", "MBL2")
+ind_snp_spread
+sup5 <- merge(sup5, ind_snp_spread)
+sup5
+write.table(sup5, "~/Dropbox/temp/sup5.txt", row.names=F, quote=F, sep="\t")
