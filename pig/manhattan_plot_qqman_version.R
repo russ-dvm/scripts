@@ -179,8 +179,8 @@ cols <- c("darkolivegreen4", "dodgerblue3","darkolivegreen4", "dodgerblue3","dar
 
 ggplot(d) + 
   geom_point(aes(x=pos, y=logp, color=CHR), size = 1) + 
-  theme_bw()+ ylab("-log(FDR)") + 
-  theme(axis.text.x=element_text(angle = 60, hjust=1, size=15), legend.title=element_blank(), text=element_text(size=20), plot.title=element_text(size=15), legend.position = "none") + 
+  theme_bw()+ ylab("-log(p)") + 
+  theme(axis.text.x=element_text(angle = 60, hjust=1), legend.title=element_blank(), legend.position = "none") + 
   theme(panel.grid.minor.x = element_line(colour = "light grey"), panel.grid.major.x = element_blank()) +
   theme(panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank()) +
   # scale_color_viridis(discrete=T) + 
@@ -191,11 +191,13 @@ ggplot(d) +
   # scale_x_continuous(labels = scientific_10) +
   # facet_zoom(x=CHR==14 & BP > 20000000 & BP < 110000000) +
   theme(strip.background = element_rect(fill="grey88")) +
-  xlab("")
+  xlab("Chromosome") +
+  theme(text = element_text(size = 10)) #+
+  # geom_text_repel(data=subset(d, d$logp >= 3), aes(x=pos, y = logp, label = SNP), nudge_x = 0.1)
 
-# ggsave("~/Dropbox/chrom.svg")
+ggsave("~/Dropbox/figure1.tiff", dpi = 600, units = "mm", width = 190, height = 100)
 
-#scale_color_manual(values=c("orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange", "navy blue","orange"))
+
 scientific_10 <- function(l) {
   # turn in to character string in scientific notation
   l <- format(l, scientific = TRUE)
