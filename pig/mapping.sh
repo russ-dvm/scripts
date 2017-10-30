@@ -45,6 +45,7 @@ do
 	
 	bwa mem -k 15 -t 8 -M -R "@RG\tID:"$ID"\tSM:"$SM"\tPL:"$PL"\tPU:"$PU"\tLB:"$LIB"" $genome "$trimmed_dir"/"$read1" "$trimmed_dir"/"$read2" > "$aligned_dir"/"$base"_unsorted.sam
 	
-	
+	samtools -@ 8 -o "$aligned_dir"/"$base"_sorted.bam "$aligned_dir"/"$base"_unsorted.sam
+
 done
 
