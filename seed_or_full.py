@@ -18,6 +18,8 @@ seed_list = []
 mir_list = []
 
 for line in seed:
+    if "#" in line:
+        continue
     line = line.rstrip()
     line_fields = line.split("\t")
 
@@ -28,6 +30,8 @@ for line in seed:
 
 
 for line in full:
+    if "#" in line:
+        continue
     line = line.rstrip()
     line_fields = line.split("\t")
 
