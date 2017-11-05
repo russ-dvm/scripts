@@ -22,8 +22,8 @@ for mir_line in mir:
 	mir_name_prelim = mir_line_fields[0]
 	mir_name = mir_name_prelim.replace(">","")
 	mir_name = mir_name + "_" + str(i)
-	loc_info = mir_line_fields[1].split(":")
-	strand = loc_info[5]
+	loc_info = mir_line_fields[1].split("|")
+	strand = loc_info[4]
 
 	#create dictionary of miRname(key) with genomic coordinates as value - note that there can be multiple hits on the same miR, so dictionary needs to be able to accomodate that. Sloppy method: add the line number to the end of each miR, thus uniquifying it. Remove the line number before printing later on (line 48).
 	mir_table[mir_name] = (mir_line_fields[10], mir_line_fields[11])
