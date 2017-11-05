@@ -67,10 +67,10 @@ else
 			java -jar ~/java/GATK/GenomeAnalysisTK.jar -T SelectVariants -R $gatk_genome -sn group9 -sn group10 -sn group11 -sn group12 -sn group13 -sn group14 -sn group15 -sn group16 -sn group17 -sn group18 -sn group19 -sn group20 -sn group21 -sn group22 -sn group23 -sn group24 -V $family/$base.all.$family.50kb.vcf -o $family/$base.diseased.$family.50kb.vcf
 			
 			#MAKE SUBDIRECTORIES FOR ALL THE DIFFERENT REGIONS & GENES
-			for x in coding intron downstream upstream 50kb_up
+			for x in coding intron downstream upstream 50kb_up 5utr 3utr
 			do
 				mkdir -p $family/$x
-				for gene_array in colec10 colec11 colec12 colec43 colec46 cgn mbl1 mbl2 sftpa sftpd fcn2 fcn3 masp1 masp2
+				for gene_array in colec10 colec11 colec12 colec43 colec46 cgn mbl1 mbl2 sftpa sftpd fcn1 masp1 masp2
 				do
 					mkdir -p $family/$x/$gene_array
 				done
@@ -87,16 +87,15 @@ else
 				["ENSBTAG00000017343"]="colec10"
 				["ENSBTAG00000016225"]="colec11"
 				["ENSBTAG00000007705"]="colec12"
-				#["ENSBTAG00000048155"]="FCN1"
-				["ENSBTAG00000048155"]="fcn2"
+				["ENSBTAG00000048155"]="fcn1"
 				# FCN3 not found
 				["ENSBTAG00000012467"]="masp1"
 				["ENSBTAG00000012808"]="masp2"
-				["ENSBTAT00000001165.3"]="mbl1" #transcript_reference
+				["ENSBTAT00000001165.3"]="mbl1" #transcript_reference - lots of confusion with SFTPA1 and MBl1
 				["ENSBTAG00000007049"]="mbl2"
 				["ENSBTAT00000031298.3"]="sftpa"	#transcript_reference
 				["ENSBTAG00000046421"]="sftpd"
-				["ENSBTAG00000006536"]="cgn"
+				["ENSBTAG00000006536"]="cgn" #two transcripts
 				["ENSBTAG00000048082"]="colec46"
 				["ENSBTAG00000047317"]="colec43"
 				)
@@ -104,7 +103,7 @@ else
 			
 			for nd in normal diseased all
 			do
-				for x in coding intron downstream upstream 50kb_up
+				for x in coding intron downstream upstream 50kb_up 5utr 3utr
 				do
 					for snpeff_gene in ${!gene_hash[@]}
 					do
@@ -160,6 +159,16 @@ else
 								echo $nd,$x,$gene_array, $type, $ann_type
 								type="$x"_gene_variant
 								java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has '$type') && ($ann_type = '$snpeff_gene') | (ANN[*].EFFECT has '5_prime_UTR_variant') && ($ann_type = '$snpeff_gene')" $family/$base.$nd.$family.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
+							elif [[ $x == "5utr" ]]
+							then
+								echo $nd,$x,$gene_array, $type, $ann_type
+								type="$x"_gene_variant
+								java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has '5_prime_UTR_variant') && ($ann_type = '$snpeff_gene')" $family/$base.$nd.$family.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
+							elif [[ $x == "3utr" ]]
+							then
+								echo $nd,$x,$gene_array, $type, $ann_type
+								type="$x"_gene_variant
+								java -jar ~/java/snpEff/SnpSift.jar filter "(ANN[*].EFFECT has '3_prime_UTR_variant') && ($ann_type = '$snpeff_gene')" $family/$base.$nd.$family.vcf > $family/$x/$gene_array/$base.$nd.$x.$gene_array.vcf
 							elif [[ $x == "downstream" ]]
 							then
 								echo $nd,$x,$gene_array, $type, $ann_type
