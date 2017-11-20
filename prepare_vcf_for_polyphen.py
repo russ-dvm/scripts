@@ -30,4 +30,4 @@ for line in vcf:
 			mutated_aa = aa_dict[str(protein_info[1][-3:])]
 			pos = int(protein_info[1][3:-3])
 
-			print(transcript, pos, orig_aa, mutated_aa)
+			print(transcript, pos, orig_aa, mutated_aa, line_fields[2], line_fields[3], line_fields[4])

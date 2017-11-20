@@ -22,14 +22,17 @@ exon_dict = defaultdict(list)
 for entry in exons:
 	entry = entry.rstrip()
 	if "feature" in entry:
-		header_list = entry.split("\t")
-		gene_id_index = header_list.index("gene_id")
-		tx_id_index = header_list.index("transcript_id")
-		pr_id_index = header_list.index("pr_id")
-		gene_name_index = header_list.index("gene_name")
-		feature_index = header_list.index("feature")
-		feature_id_index = header_list.index("feature_id")
-		strand_index = header_list.index("strand")
+		try:
+			header_list = entry.split("\t")
+			gene_id_index = header_list.index("gene_id")
+			tx_id_index = header_list.index("transcript_id")
+			pr_id_index = header_list.index("pr_id")
+			gene_name_index = header_list.index("gene_name")
+			feature_index = header_list.index("feature")
+			feature_id_index = header_list.index("feature_id")
+			strand_index = header_list.index("strand")
+		except:
+			pass
 	else:
 		entry_fields = entry.split("\t")
 		quick = [entry_fields[1], entry_fields[2], entry_fields[gene_id_index], entry_fields[tx_id_index], entry_fields[pr_id_index], entry_fields[strand_index], entry_fields[feature_index], entry_fields[feature_id_index], entry_fields[gene_name_index]]
