@@ -9,7 +9,8 @@ input=$1
 base=$2
 interval=/media/russ/data/bovine/ref_files/intervals.txt
 usage=$(echo "snpeff_sorting.sh <input> <output>")
-snpeff_genome=UMD3.1.82
+# snpeff_genome=UMD3.1.82
+snpeff_genome=UMD3.1.90.custom
 gatk_genome=/media/russ/data/bovine/genome/Sequence/WholeGenomeFasta/genome.chr.fa
 
 #check to see if the command has been issued properly - requires input and output
