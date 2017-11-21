@@ -48,8 +48,8 @@ for line in doc:
                 #Print the results at the end of the determined interval length
                 if i == bins:
                     endPos = pos
-                    avgDepth = depth/sampleNum/bins
-
+                    # avgDepth = depth/sampleNum/bins
+                    avgDepth = depth/bins
                     print(chrom, startPos, endPos, avgDepth)
 
                     #Reset the variables
@@ -59,7 +59,8 @@ for line in doc:
                 # depth = depth + float(line_fields[1])
                 endPos = oldPos
                 test = int(endPos) - int(startPos)
-                avgDepth = depth/sampleNum/test
+                # avgDepth = depth/sampleNum/test
+                avgDepth = depth/test
                 print(oldChrom, startPos, endPos, avgDepth)
                 i = 0
                 depth = 0
