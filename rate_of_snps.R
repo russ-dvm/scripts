@@ -15,7 +15,7 @@ annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/results_utr_
 annotated_depth <- read.table("~/equine/2014_11_24/depth_of_regions/results_utr_adjusted_aug30.txt", h=T, sep="\t")
 
 #Function to summarize the data into a dataframe.
-summarize <- function(info, data, depth){
+summarize <- function(info, data, depth_cutoff){
 
     #Get a list of gene names and regions present within the annotation data frame
     genes <- unique(info$gene_name)
@@ -38,7 +38,7 @@ summarize <- function(info, data, depth){
         all_gene_targeted_total <- all_gene_targeted_total + region_total
         
         #Calculate the number of bases sequenced to a depth >= $depth (e.g. 5x / animal)
-        region_sequenced <- nrow(subset(data, data$feature == region & data$gene_name == gene & data$depth >= depth))
+        region_sequenced <- nrow(subset(data, data$feature == region & data$gene_name == gene & data$depth >= depth_cutoff))
         all_gene_sequenced_total <- all_gene_sequenced_total + region_sequenced
         
         #Calculate the number of variants for each gene/region
