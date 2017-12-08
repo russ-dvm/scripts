@@ -7,8 +7,8 @@ library(ggforce)
 ######ASSESS THE DATA
 ##IMPORT
 
-freq_table <- read.table("~/bovine/merged_runs/popoolation/nd.freqs_rc", h=T, stringsAsFactors = F)
-fisher <- read.table("~/bovine/merged_runs/popoolation/nd.subsampled400.ready.fet", col.names=c("Chrom", "pos", "A", "B", "C", "Pop", "invlogp"))
+freq_table <- read.table("~/bovine/merged_runs/popoolation/nd-intervals.400_rc", h=T, stringsAsFactors = F)
+fisher <- read.table("~/bovine/merged_runs/popoolation/nd-intervals.400.ready.fet", col.names=c("Chrom", "pos", "A", "B", "C", "Pop", "invlogp"))
 
 ##Check the the major and minor alleles for each population are the same
 freq_table <- separate(freq_table, major_alleles.maa., c("maa_n", "maa_d"), sep = 1)
@@ -37,6 +37,9 @@ freq_table$mia_same <- freq_table$mia_n == freq_table$mia_d
 
 ##Have a look at multi-allelic sites:
 multi_allele <- subset(freq_table, nchar(freq_table$allele_states) > 3)
+
+#Keep 35598949 which is in the VCF file... the remaindera are not.
+freq_table[grep(35598949, freq_table$pos),5] <- "T/A"
 ##How do those look in the FET data and raw data? 
 ## Does it matter? These alleles were excluded in SNV calling; should be excluded here too.
 freq_table <- subset(freq_table, nchar(freq_table$allele_count) <= 3)
@@ -45,13 +48,19 @@ freq_table <- subset(freq_table, nchar(freq_table$allele_count) <= 3)
 freq_table <- freq_table[freq_table$mia_same == T,]
 
 ##Merge the results of fisher's exact test with the actual frequencies
-mega_table <- merge(freq_table, fisher, by.x = "pos")
-mega_table_curated <- mega_table[c(-3, -4, -6, -7, -16:-22)]
+## Due to overlapping coords need to make a chr:pos column prior to merging
+freq_table$uniq <- paste(freq_table$chr, freq_table$pos, sep = ":")
+fisher$uniq <- paste(fisher$Chrom, fisher$pos, sep = ":")
 
+# mega_table <- merge(freq_table, fisher, by.x = "pos")
+
+mega_table <- merge(freq_table, fisher, by.x = "uniq", by.y = "uniq")
+# mega_table_curated <- mega_table[c(-1, -4, -5, -7, -16:-22)]
+mega_table_curated <- mega_table[,c(1,2,3,6,9:16,25)]
 
 ####Manipulate the format of frequency diffs
 ##Isolate the minor allele fractions
-maybe <- data.frame("mia_n" = as.character(mega_table$mia_1), "mia_d" = as.character(mega_table$mia_2), "pos" = as.numeric(mega_table$pos), "chrom" = as.character(mega_table$chr))
+maybe <- data.frame("mia_n" = as.character(mega_table$mia_1), "mia_d" = as.character(mega_table$mia_2), "pos" = as.numeric(mega_table$pos.x), "chrom" = as.character(mega_table$chr))
 ##Split numerator and denominator
 maybe <- separate(maybe, mia_n, c("alt_n", "total_n"), sep = "/")
 maybe <- separate(maybe, mia_d, c("alt_d", "total_d"), sep = "/")
@@ -66,17 +75,19 @@ maybe$d_freq <- maybe$alt_d/maybe$total_d
 ##Calculate the difference in the frequencies -- SHOULD THIS A DIVISION?? 
 maybe$diff <- maybe$n_freq - maybe$d_freq
 
+maybe$uniq <- paste(maybe$chrom, maybe$pos, sep = ":")
+
 ##Do some QC - have a look at the distribution of differences
 
 ggplot(maybe, aes(x = diff)) + geom_histogram(colour = "black", fill = "white", binwidth = 0.01) + theme_bw()
-qqnorm(maybe$diff) + qqline(maybe$diff)
+qqnorm(maybe$diff)+ qqline(maybe$diff, probs = c(0.27, 0.75))
 
 
 ###Merge back into main table and create a final publication ready table
-mega_table_curated <- merge(mega_table_curated, maybe, by.x = "pos")
-final_table <- mega_table_curated[,c(2,1,4,6,10,11,18:20,12)]
+mega_table_curated <- merge(mega_table_curated, maybe, by.x = "uniq")
+final_table <- mega_table_curated[,c(1,2,3,5,7,11,12,20:22,13)]
 
-colnames(final_table) <- c("Chrom", "Position", "Ref allele", "Alt allele", "Frac (reads) in normal", "Frac (reads) in diseasd", "Freq in normal", "Freq in diseased", "Freq diff", "-log(p)")
+colnames(final_table) <- c("uniq","Chrom", "Position", "Ref allele", "Alt allele", "Frac (reads) in normal", "Frac (reads) in diseasd", "Freq in normal", "Freq in diseased", "Freq diff", "-log(p)")
 
 ##
 final_table$P <- 10^-final_table$`-log(p)`
@@ -88,14 +99,20 @@ final_table <- final_table[order(final_table$logBH, decreasing = T),]
 final_table$rank <- c(1:nrow(final_table)) 
 
 ### Add in rsIDs
-vcf <- read.table("~/bovine/merged_runs/6_variants/lectin/17-11-09.all.lectin.vcf", h = F)
+vcf <- read.table("~/bovine/merged_runs/6_variants/lectin/17-11-23.updated-intervals.all.lectin.vcf", h = F)
 vcf <- vcf[, c(1:3)]
 colnames(vcf) <- c("chr", "Position", "rsID")
+vcf$uniq <- paste(vcf$chr, vcf$Position, sep = ":")
 
-final_table <- merge(final_table, vcf, by.x = "Position", all.x = T)
-
-##Print final table
+final_table <- merge(final_table, vcf, by = "uniq", all.x = T)
+final_table <- final_table[,c(-1, -16, -17)]
+colnames(final_table)[2] <- "Position"
+#Print final table
 write.table(final_table, "~/Dropbox/temp/pub_table.txt", sep="\t", row.names=F, quote=F)
+
+###Write out the variants not in the VCF file for checking
+missing_vals <- final_table[is.na(final_table$rsID),1]
+write.table(missing_vals, "~/bovine/merged_runs/popoolation/in.pop.not.in.gatk.txt", sep = "\t", row.names = F, quote = F)
 
 ########GRAPHING########
 
@@ -238,7 +255,7 @@ d$CHR <- as.factor(d$CHR)
 ##Change chr30 to chrX
 labs[30] <- "X"
 ## Collectin locus gene coords
-colec <- c(35541900,35591906,35602846,35668986,35700161,35714667,35748478,35813760,35824383,35840849,35846070,35850665,35854765,35870565)
+colec <- c(35543220,35591906,35602846,35668986,35700161,35714667,35748478,35813760,35824383,35840849,35846070,35850665,35854765,35870565)
 ## Adjust so that it reflects the pos argument from the manhattan function. Can determine the distance by pos - BP - then add that value to the above.
 colec <- 2414264736 + colec
 
@@ -247,6 +264,9 @@ colec <- 2414264736 + colec
 sigAtClass1 <- subset(d, bh <= class1)
 sigAtClass2 <- subset(d, bh <= class2)
 sigAtClass3 <- subset(d, bh <= class3)
+
+## Colours
+gene_cols <- rep(c("grey27", "grey67"), 15)
 
 ##GGPLOT MOD BY RUSSELL FRASER
 #scale_x_continous seems to break the x-axis of the facet_zoom
@@ -267,17 +287,23 @@ fig <- ggplot(d) +
   geom_hline(yintercept=-log10(class1), colour="dark grey", linetype = "dashed") + 
   geom_hline(yintercept=-log10(class2), colour="dark grey") +
   # geom_hline(yintercept=-log10(class3), colour = "dark grey") +
-  facet_zoom(x=CHR==28)+ facet_zoom(x=CHR==28 & BP > 35541900 & BP < 35870565) +
-  annotate("text", x = 2650906405, y = -log10(class2), label = paste("n =", nrow(sigAtClass2)), vjust = -0.2) +
+  annotate("text", x = 2650906405, y = -log10(class2), label = paste("n =", nrow(sigAtClass2)-nrow(sigAtClass1)), vjust = -0.2) +
   annotate("text", x = 2650906405, y = -log10(class1), label = paste("n =", nrow(sigAtClass1)), vjust = -0.2) +
-  scale_y_continuous(expand = c(0,0), limits = c(0, 9))
+  scale_y_continuous(expand = c(0,0), limits = c(0, 9)) +
+  scale_colour_manual(values = gene_cols)
+
+fig <- fig + facet_zoom(x=CHR==28)+ facet_zoom(x=CHR==28 & BP > 35543220 & BP < 35870565)
+fig <- fig + facet_zoom(x=CHR==1) + facet_zoom(x=CHR==1 & BP >= 80546982 & BP <= 80650824) #MASP1
+fig <- fig + facet_zoom(x=CHR==8) + facet_zoom(x=CHR==8 & BP >= 112867044 & BP <= 112896491) #COLEC11
+fig <- fig + facet_zoom(x=CHR==11) + facet_zoom(x=CHR==11 & BP >= 106773026 & BP <= 106834643)
 fig
+
 
 fig_a <- fig + 
   scale_x_continuous(minor_breaks = minor_ticks, breaks = ticks, labels = labs)
 
 fig_b <- fig +
-  scale_x_continuous(minor_breaks = colec, breaks = colec, labels = c(35541900, "CGN", "", "CL46", "", "CL43", "", "SFTPD", "", "MBL1", "", "SFTPA1", "",35870565))
+  scale_x_continuous(minor_breaks = colec, breaks = colec, labels = c("35,543,220", "CGN", "", "CL46", "", "CL43", "", "SFTPD", "", "MBL1", "", "SFTPA1", "","35,870,565"))
 
 fig_a
 fig_b
