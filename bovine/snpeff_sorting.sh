@@ -88,7 +88,7 @@ else
 				["ENSBTAG00000017343"]="colec10"
 				["ENSBTAG00000016225"]="colec11"
 				["ENSBTAG00000007705"]="colec12"
-				["ENSBTAG00000048155"]="fcn1"
+				["ENSBTAT00000066000.1"]="fcn1" #decided on this transcript variant with BL
 				# FCN3 not found
 				["ENSBTAG00000012467"]="masp1"
 				["ENSBTAG00000012808"]="masp2"
@@ -96,7 +96,7 @@ else
 				["ENSBTAG00000007049"]="mbl2"
 				["ENSBTAT00000031298.3"]="sftpa"	#transcript_reference
 				["ENSBTAG00000046421"]="sftpd"
-				["ENSBTAG00000006536"]="cgn" #two transcripts
+				["ENSBTAT00000018649.5"]="cgn" #two transcripts, decided on thsi one with BL
 				["ENSBTAG00000048082"]="colec46"
 				["ENSBTAG00000047317"]="colec43"
 				)
@@ -110,7 +110,7 @@ else
 					do
 						gene_array="${gene_hash[$snpeff_gene]}"
 
-						if [[ $gene_array == "mbl1" ]] || [[ $gene_array == "sftpa" ]]
+						if [[ $gene_array == "mbl1" ]] || [[ $gene_array == "sftpa" ]] || [ $gene_array == "fcn1" ] || [ $gene_array == "cgn" ]
 						then
 							ann_type=ANN[*].TRID
 						else
