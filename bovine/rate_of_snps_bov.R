@@ -59,6 +59,8 @@ summarize <- function(info, var_data, depth_cutoff){
 colec <- summarize(annotation_info, all, 600)
 colec$rateKb <- colec$Rate*1000
 
+
+
 #### STATS ####
 
 ## Create lists of the data by region and by gene
@@ -71,17 +73,20 @@ for(gene in unique(colec$Gene)) {
     colecTrimmed <- subset(colec, Region != "3kb_from_gene")
     colecTrimmed <- subset(colecTrimmed, Region != "3UTR")
     colecTrimmed <- subset(colecTrimmed, Region != "5UTR")
+    colecTrimmed <- subset(colecTrimmed, Region != "5kb_from_gene")
+    colecTrimmed <- subset(colecTrimmed, Region != "45kb_from_gene")
     tmp <- list(subset(colecTrimmed, colecTrimmed$Gene == gene)$Rate)
     names(tmp) <- gene
     gene_list <- c(gene_list, tmp)
   }
 }
 
+colecTrimmedByGene <- colecTrimmed
 colecTrimmed <- subset(colecTrimmed, Gene != "Total")
 
 region_list <- list()
-for(region in unique(colec$Region)) {
-  tmp <- list(subset(colec, colec$Region == region)$Rate)
+for(region in unique(colecTrimmed$Region)) {
+  tmp <- list(subset(colecTrimmed, colecTrimmed$Region == region)$Rate)
   names(tmp) <- region
   region_list <- c(region_list, tmp)
 }
@@ -89,53 +94,61 @@ for(region in unique(colec$Region)) {
 lapply(region_list, shapiro.test)
 lapply(gene_list, shapiro.test)
 
-#Use kruskal wallis
+#Use kruskal wallis - low sample numbers and questionable normality
 kruskal.test(region_list)
 kruskal.test(gene_list)
 
-#remove total from colec
-aov <- aov(colecTrimmed$Rate ~ colecTrimmed$Gene)
-summary(aov)
-tuk_genes <- TukeyHSD(aov)
-tukFrame <- data.frame(tuk_genes[[1]])
-tukFrame[tukFrame$p.adj < 0.05,]
+#Dunn test for post-hoc evaluation
+library(dunn.test)
 
-## Make a list for ggpubr - uses Kruskal Wallis and follows up with Mann-Whitney
-forComp <- as.list(strsplit(rownames(tukFrame[tukFrame$p.adj < 0.05,]), "-"))
+#Irritatingly this doens't use the list names in the output...
+dunn.test(gene_list, label = T, list = T, method = "bh")
 
+#Make a dataframe and gather it to solve the issue
+geneDunn <- ldply(gene_list) %>% gather(key = ".id")
+colnames(geneDunn) <- c("gene", "region", "value")
+dunnRes <- dunn.test(x = geneDunn$value, g = geneDunn$gene, method = "bh", list = T)
+sigComps <- dunnRes$comparisons[dunnRes$P.adjusted<0.05]
+sigCompsforPubr <- strsplit(sigComps, " - ")
 
+#Manual reordering of the significant comparisons for a more aesthetically pleasing plot... will have to be altered if the data changes.
+sigRe <-c(sigCompsforPubr[3], sigCompsforPubr[4], sigCompsforPubr[8], sigCompsforPubr[5], sigCompsforPubr[6], sigCompsforPubr[7], sigCompsforPubr[1], sigCompsforPubr[2])
+
+## DFs for plotting - get rid of totals - one with UTRs and one wihtout
+colecUTR <- subset(colec, Gene != "Total")
+colecUTR <- subset(colecUTR, Region != "5kb_from_gene")
+colecUTR <- subset(colecUTR, Region != "45kb_from_gene")
+colecUTR <- subset(colecUTR, Region != "3kb_from_gene")
+colecUTR$Region <- gsub("5UTR", "5' UTR", colecUTR$Region)
+colecUTR$Region <- gsub("3UTR", "3' UTR", colecUTR$Region)
 
 ## Relevel the regions
-colecTrimmed$Region <- gsub("45kb", "5-50 kb upstream", colecTrimmed$Region)
-colecTrimmed$Region <- gsub("5kb", "Upstream 5 kb", colecTrimmed$Region)
-colecTrimmed$Region <- gsub("5UTR", "5' UTR", colecTrimmed$Region)
+colecTrimmed$Region <- gsub("45kb_from_start", "5-50 kb upstream", colecTrimmed$Region)
+colecTrimmed$Region <- gsub("5kb_from_start", "Upstream 5 kb", colecTrimmed$Region)
 colecTrimmed$Region <- gsub("exon", "Coding", colecTrimmed$Region)
 colecTrimmed$Region <- gsub("intron", "Intron", colecTrimmed$Region)
 colecTrimmed$Region <- gsub("3kb_from_stop", "Downstream 3 kb", colecTrimmed$Region)
-colecTrimmed$Region <- gsub("3UTR", "3' UTR", colecTrimmed$Region)
-tizzemp <- colecTrimmed
-colecTrimmed <- tizzemp
-colecTrimmed$Region <- factor(colecTrimmed$Region, levels = c("5-50 kb upstream", "Upstream 5 kb", "5' UTR", "Coding", "Intron", "3' UTR", "Downstream 3 kb"))
+colecTrimmed$Region <- factor(colecTrimmed$Region, levels = c("5-50 kb upstream", "Upstream 5 kb", "Coding", "Intron", "Downstream 3 kb"))
 
 ####PLOTS####
-a <- ggplot(subset(colecTrimmed, colecTrimmed$Gene != "Total"), aes(x = Gene, y = Rate*1000)) + 
+a <- ggplot(colecTrimmed, aes(x = reorder(colecTrimmed$Gene, colecTrimmed$Rate, function(x)-median(x)), y = Rate*1000)) + 
   geom_boxplot() + 
   theme(text = element_text(size = 10)) +
   # stat_summary(fun.y = mean, colour = "grey", geom = "text", label = "----") +
   theme_bw() +
-  ylab("Number of variants per kb") +
+  ylab("Number of variants per kb by region") +
   xlab("") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   ggtitle("a)") +
   theme(plot.title = element_text(hjust = -0.14, size = 10)) +
   theme(panel.grid.major.x = element_blank(), panel.grid.minor.y = element_blank()) +
-  stat_compare_means(method = "wilcox.test",comparisons = forComp, label = "p.format", aes(size = 30)) 
+  stat_compare_means(method = "wilcox.test", comparisons = sigRe, label = "p.format") 
 a
 
 b<- ggplot(subset(colecTrimmed, colecTrimmed$Gene != "Total"), aes(x = Region, y = Rate*1000)) +
   geom_boxplot() +
   theme_bw() +
-  ylab("Number of variants per kb") +
+  ylab("Number of variants per kb by gene") +
   xlab("") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   # stat_summary(fun.y = mean, colour = "grey", geom = "text", label = "----", size = 8) +
@@ -146,7 +159,7 @@ b
 
 grid.arrange(a, b, ncol = 2)
 
-## Convoluted way to get the plots to be the same height (gridarrange was not doin the trick) ** ONLY needed if both boxplots are used. the Bar plot is no problemo.
+## Convoluted way to get the plots to be the same height (gridarrange was not doing the trick) ** ONLY needed if both boxplots are used. the Bar plot is no problemo.
 ## convert plots to gtable objects
 library(gtable)
 library(grid) # low-level grid functions are required
@@ -163,3 +176,19 @@ g$vp <- viewport(width = unit(fig_size[1], "mm"), height=unit(fig_size[2],"mm")-
 library("Cairo")
 ggsave("~/Dropbox/temp/figure_2.pdf", g, width=fig_size[1], height=fig_size[2], units = "mm", dpi = 1000, device = cairo_pdf)
 
+
+### Write out the table
+## Relevel the regions
+colecTrimmedByGene$Region <- gsub("45kb_from_start", "5-50 kb upstream", colecTrimmedByGene$Region)
+colecTrimmedByGene$Region <- gsub("5kb_from_start", "Upstream 5 kb", colecTrimmedByGene$Region)
+colecTrimmedByGene$Region <- gsub("exon", "Coding", colecTrimmedByGene$Region)
+colecTrimmedByGene$Region <- gsub("intron", "Intron", colecTrimmedByGene$Region)
+colecTrimmedByGene$Region <- gsub("3kb_from_stop", "Downstream 3 kb", colecTrimmedByGene$Region)
+colecTrimmedByGene$Region <- factor(colecTrimmedByGene$Region, levels = c("5-50 kb upstream", "Upstream 5 kb", "Coding", "Intron", "Downstream 3 kb"))
+colecTrimmedByGene <- colecTrimmedByGene[order(colecTrimmedByGene$Gene),]
+write.table(colecTrimmedByGene, file = "~/Dropbox/temp/rates.txt", row.names = F, quote = F, sep = "\t")
+
+######SANKEY PLOT######
+###Note: this doesn't work on the Unix comp - the github version of ggforce wouldn't install and I can't be bothered to resolve the dependencies - but does work on windows. Things to improve - vertically center the axes, adjust labels so that they appear outside of boxes? Too small to read ATM. Easy enough to add a third column for allele frequency significance.
+# test <- gather_set_data(colecTrimmed, 1:2)
+# ggplot(test, aes(x = x, id = id, value = No.variants, split = y)) + geom_parallel_sets(aes(fill = test$Gene), alpha = 0.3, show.legend = F) + geom_parallel_sets_axes(axis.width = 0.1) + geom_parallel_sets_labels(colour = "white", size = 2, angle = 0) + theme_bw() + theme(panel.grid = element_blank()) + xlab("") + ylab("") + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
