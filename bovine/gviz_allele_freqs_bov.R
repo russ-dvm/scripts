@@ -51,10 +51,10 @@ gtrack <- GenomeAxisTrack()
 ## Target track - track containing the actual targeted regions
 target <- read.table("~/bovine/ref_files/bait.body.txt", sep = "\t")
 target$V1 <- gsub("chr", "", target$V1)
-targetTrack <- AnnotationTrack(start = target$V2, end = target$V3, chromosome = target$V1, name = "", stacking = "dense")
+targetTrack <- AnnotationTrack(start = target$V2, end = target$V3, chromosome = target$V1, name = "d", stacking = "dense")
 
 ##Depth track - to allow identification of low coverage regions where variants may not have been called
-dtrack <- DataTrack(range = all_bams, chromosome = chr, genome = genome, type = "histogram", col.histogram = "#377EB8", fill = "#377EB8", name = "", baseline = 600, col.baseline = "red", size = 1)
+dtrack <- DataTrack(range = all_bams, chromosome = chr, genome = genome, type = "histogram", col.histogram = "#377EB8", fill = "#377EB8", name = "Depth", baseline = 600, col.baseline = "red", size = 1)
 
 ##Create the transcript track
 ##UCSC genome name and Ensembl name are incompatible for reasons beyond my comprehension. Can access the proper ensembl DB by specifying the dataset to be used with the following command: 
@@ -118,13 +118,13 @@ mcols(freqGrange)$logBH <- tmpMerged$logBH
 ##Make the datatrack
 class2 <- -log10(5e-6)
 
-var_track <- DataTrack(freqGrange, name = "", type = "p", chromosome = chr, showSampleNames = T, baseline = class2, col.baseline = "red", size = 1, grid = F, ylim = c(0,8), fontsize = 11)
+var_track <- DataTrack(freqGrange, type = "p", name = "-log(p-adj)", chromosome = chr, showSampleNames = T, baseline = class2, col.baseline = "red", size = 1, grid = F, ylim = c(0,8), fontsize = 11)
 
 #The boxes to the left are the ".title" boxes - thus to manipulate the colours, use things like background.title or fontcolor.title. To see the names of all the parameters that can be manipulated -- names(displayPars(**TRACK**)). Can manipulate globally (within the plotTracks), or for individual tracks (within the tracks themselves). background.title = "white", fontcolor.title = "black"
 
 # plotTracks(c(gtrack, geneTrack, var_track, dtrack), from = start, to = end, sizes = c(0.5,0.5,1,0.5), background.title = "white", fontcolor.title = "black", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7)
 
-plotTracks(c(gtrack, bmt, var_track, dtrack), from = start, to = end, sizes = c(0.5,0.5,1,1), background.title = "white", fontcolor.title = "black", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7)
+plotTracks(c(gtrack, bmt, var_track, dtrack, targetTrack), from = start, to = end, sizes = c(0.5,0.5,1,1,0.5), background.title = "white", fontcolor.title = "black", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7)
 
 ## IF FCN1!!!: symbol(bmt)[c(1:21)] <- "FCN1"
 
