@@ -10,41 +10,6 @@ library("BSgenome.Btaurus.UCSC.bosTau8")
 genome <- "bosTau8"
 all_bams <- "~/bovine/merged_runs/3_realigned/all.bam"
 
-# # ##MASP1
-start <- 80546982
-end <- 80650824
-name <- "MASP1"
-chr <- 1
-just <- "left"
-
-## COLEC LOCUS
-# start <- 35543220
-# end <- 35870565
-# name <- "Collectin Locus"
-# chr <- 28
-# just <- "left"
-
-# ## COLEC11
-# start <- 112867044
-# end <- 112896491
-# name <- "COLEC11"
-# chr <- 8
-# just <- "right"
-
-# ## FCN1
-# start <- 106773026
-# end <- 106834643
-# name <- "FCN1"
-# chr <- 11
-# just <- "left"
-
-# ## COLEC12
-# start <-35629346		
-# end <- 35866133
-# name <- "COLEC12"
-# chr <- 24
-# just <- "right"
-
 ##Gtrack - genome track. Displays the coordinates of the genome.
 gtrack <- GenomeAxisTrack()
 
@@ -53,21 +18,33 @@ target <- read.table("~/bovine/ref_files/bait.body.txt", sep = "\t")
 target$V1 <- gsub("chr", "", target$V1)
 targetTrack <- AnnotationTrack(start = target$V2, end = target$V3, chromosome = target$V1, name = "d", stacking = "dense")
 
-##Depth track - to allow identification of low coverage regions where variants may not have been called
-dtrack <- DataTrack(range = all_bams, chromosome = chr, genome = genome, type = "histogram", col.histogram = "#377EB8", fill = "#377EB8", name = "Depth", baseline = 600, col.baseline = "red", size = 1)
-
 ##Create the transcript track
 ##UCSC genome name and Ensembl name are incompatible for reasons beyond my comprehension. Can access the proper ensembl DB by specifying the dataset to be used with the following command: 
 btau_mart <- useMart("ensembl", dataset="btaurus_gene_ensembl")
 
+##MASP1
+start <- 80546982; end <- 80650824; name <- "MASP1"; chr <- 1; just <- "left"
+
+## COLEC LOCUS
+# start <- 35543220; end <- 35870565; name <- "Collectin Locus"; chr <- 28; just <- "left"
+
+## COLEC11
+# start <- 112867044; end <- 112896491; name <- "COLEC11"; chr <- 8; just <- "right"
+
+## FCN1
+# start <- 106773026; end <- 106834643; name <- "FCN1"; chr <- 11; just <- "left";
+
+## COLEC12
+# start <-35629346; end <- 35866133; name <- "COLEC12"; chr <- 24; just <- "right"
+
 ##Now make sure to include the "mart" option in the following, with mart = btau_mart;  stacking = "squish"
 bmt <- BiomartGeneRegionTrack(genome = "BosTau8", biomart = btau_mart, name = "", collapseTranscripts = T, chromosome = chr, start = start, end = end, shape = "arrow", transcriptAnnotation = "symbol", just.group = just)
-
 ##Need to fix the bmt track, as the coordinates for certain genes are not the same as what we used (eg the collectin locus -sfpa/mbl)
 ## Convert to data frame and get rid of the fluff
+# IF FCN1!!!: 
+# symbol(bmt)[c(1:21)] <- "FCN1"
 
 geneDf <- as.data.frame(ranges(bmt))
-
 #Remove fake-out SPA
 geneDf <- geneDf[-grep("ENSBTAT00000064451", geneDf$transcript),]
 geneDf <- geneDf[-grep("ENSBTAT00000063315", geneDf$transcript),]
@@ -120,11 +97,15 @@ class2 <- -log10(5e-6)
 
 var_track <- DataTrack(freqGrange, type = "p", name = "-log(p-adj)", chromosome = chr, showSampleNames = T, baseline = class2, col.baseline = "red", size = 1, grid = F, ylim = c(0,8), fontsize = 11)
 
+
+##Depth track - to allow identification of low coverage regions where variants may not have been called
+dtrack <- DataTrack(range = all_bams, genome = genome, type = "histogram", col.histogram = "#377EB8", fill = "#377EB8", name = "Depth", baseline = 600, col.baseline = "red", size = 1, chromosome = chr)
+plotTracks(dtrack, from = start, to = end)
 #The boxes to the left are the ".title" boxes - thus to manipulate the colours, use things like background.title or fontcolor.title. To see the names of all the parameters that can be manipulated -- names(displayPars(**TRACK**)). Can manipulate globally (within the plotTracks), or for individual tracks (within the tracks themselves). background.title = "white", fontcolor.title = "black"
 
-# plotTracks(c(gtrack, geneTrack, var_track, dtrack), from = start, to = end, sizes = c(0.5,0.5,1,0.5), background.title = "white", fontcolor.title = "black", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7)
+# plotTracks(c(gtrack, geneTrack, var_track, dtrack, targetTrack), from = start, to = end, sizes = c(0.5,0.5,1,1,0.5), background.title = "white", fontcolor.title = "black", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7)
+# 
+plotTracks(c(gtrack, bmt, var_track, dtrack, targetTrack), from = start, to = end, sizes = c(0.5,0.5,1,1,0.5), background.title = "white", fontcolor.title = "black", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7, add = T)
 
-plotTracks(c(gtrack, bmt, var_track, dtrack, targetTrack), from = start, to = end, sizes = c(0.5,0.5,1,1,0.5), background.title = "white", fontcolor.title = "black", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7)
 
-## IF FCN1!!!: symbol(bmt)[c(1:21)] <- "FCN1"
 
