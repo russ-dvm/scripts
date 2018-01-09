@@ -24,9 +24,9 @@ for line in results:
 		#find genomic start and end of the gene
 		fasta_header_fields = fasta_header.split(":")
 		strand = fasta_header_fields[5]
-		chrom = fasta_header_fields[0]
-		lower_genome_coord = fasta_header_fields[4]
-		higher_genome_coord = fasta_header_fields[5]
+		chrom = fasta_header_fields[2]
+		lower_genome_coord = fasta_header_fields[3]
+		higher_genome_coord = fasta_header_fields[4]
 
 		mir_coords = line_fields[5].split(" ")
 		mir_start = mir_coords[0]

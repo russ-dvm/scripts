@@ -49,9 +49,9 @@ tkResSig <- subset(tkRes, mean_depths_gathered.gene.p.adj < 0.05)
 tkResSig <- tkResSig[order(tkResSig$mean_depths_gathered.gene.diff),]
 
 ##Differences between status at each gene
-healthy <- subset(mean_depths_gathered, Population == "Infectious")
+healthy <- subset(mean_depths_gathered, Population == "Non-Infectious")
 healthy_list <- split(healthy$avg, healthy$gene)
-dis <- subset(mean_depths_gathered, Population == "Non-Infectious")
+dis <- subset(mean_depths_gathered, Population == "Infectious")
 dis_list <- split(dis$avg, dis$gene)
 
 ##the below is...ugly. But I couldnt' get lapply to work over the two lists. And it was taking too long to figure out how. 
