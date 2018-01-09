@@ -33,7 +33,7 @@ with open(args.csv,'r') as file:
         elif entry.count("TF ID") == 1:
             print("#chrom", "genomic_start", "genomic_end", end = "\t", sep = "\t")
             print(*entry, end = "\t", sep = "\t")
-            print("var_pos", "rsID", "ref", "alt", "alt_seq")
+            print("var_pos", "rsID", "ref", "alt", "alt_seq", sep = "\t")
         else:
             seq = entry[5]
             tf_start = int(entry[6])

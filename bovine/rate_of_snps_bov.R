@@ -135,8 +135,8 @@ a <- ggplot(colecTrimmed, aes(x = reorder(colecTrimmed$Gene, colecTrimmed$Rate, 
   geom_boxplot() + 
   theme(text = element_text(size = 10)) +
   # stat_summary(fun.y = mean, colour = "grey", geom = "text", label = "----") +
-  theme_bw() +
-  ylab("Number of variants per kb by region") +
+  theme_classic() +
+  ylab("Variant density (per kb) by gene") +
   xlab("") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   ggtitle("a)") +
@@ -147,8 +147,8 @@ a
 
 b<- ggplot(subset(colecTrimmed, colecTrimmed$Gene != "Total"), aes(x = Region, y = Rate*1000)) +
   geom_boxplot() +
-  theme_bw() +
-  ylab("Number of variants per kb by gene") +
+  theme_classic() +
+  ylab("Variant density (per kb) by region") +
   xlab("") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   # stat_summary(fun.y = mean, colour = "grey", geom = "text", label = "----", size = 8) +
@@ -168,13 +168,13 @@ g2 <- ggplotGrob(b)
 g <- cbind(g1, g2, size="first") # stack the two plots
 # g$heights <- unit.pmin(g1$heights, g2$heights) # use the smallest heights
 
-fig_size <- c(190, 100) # inches
+fig_size <- c(190, 120) # inches
 margin <- unit(1, "line")
 
 g$vp <- viewport(width = unit(fig_size[1], "mm"), height=unit(fig_size[2],"mm")- margin)
 
 library("Cairo")
-ggsave("~/Dropbox/temp/figure_2.pdf", g, width=fig_size[1], height=fig_size[2], units = "mm", dpi = 1000, device = cairo_pdf)
+ggsave("~/Dropbox/temp/figure_RATES.pdf", g, width=fig_size[1], height=fig_size[2], units = "mm", dpi = 1000, device = cairo_pdf)
 
 
 ### Write out the table
@@ -189,6 +189,6 @@ colecTrimmedByGene <- colecTrimmedByGene[order(colecTrimmedByGene$Gene),]
 write.table(colecTrimmedByGene, file = "~/Dropbox/temp/rates.txt", row.names = F, quote = F, sep = "\t")
 
 ######SANKEY PLOT######
-###Note: this doesn't work on the Unix comp - the github version of ggforce wouldn't install and I can't be bothered to resolve the dependencies - but does work on windows. Things to improve - vertically center the axes, adjust labels so that they appear outside of boxes? Too small to read ATM. Easy enough to add a third column for allele frequency significance.
+###Note: this doesn't work on the Unix comp - the github version of ggforce wouldn't install and I can't be bothered to resolve the dependencies - but does work on windows. Things to improve - vertically center the axes, adjust labels so that they appear outside of boxes? Too small to read ATM. Easy enough to add a third column for allele frequency significance.git c
 # test <- gather_set_data(colecTrimmed, 1:2)
 # ggplot(test, aes(x = x, id = id, value = No.variants, split = y)) + geom_parallel_sets(aes(fill = test$Gene), alpha = 0.3, show.legend = F) + geom_parallel_sets_axes(axis.width = 0.1) + geom_parallel_sets_labels(colour = "white", size = 2, angle = 0) + theme_bw() + theme(panel.grid = element_blank()) + xlab("") + ylab("") + theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())

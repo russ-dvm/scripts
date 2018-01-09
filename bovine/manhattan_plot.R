@@ -273,16 +273,16 @@ gene_cols <- rep(c("grey27", "grey67"), 15)
 #There's probably a smart workaround, but for now, the best I can come up with is saving a copy of the graph with
 # and without the sacle_x_continous as SVG and then merging the two. 
 
-fig <- ggplot(d) + 
-  geom_point(aes(x=pos, y=logbh, color=CHR)) + 
+fig <- ggplot(d, aes(x=pos, y=logbh, color=CHR, label = BP)) + 
+  geom_point() + 
   theme_bw() +
   theme(panel.grid.minor.x = element_line(colour = "light grey"), panel.grid.major.x = element_blank()) +
   theme(panel.grid.major.y = element_blank(), panel.grid.minor.y = element_blank()) +
-  # ylab("-log(adjusted italic(p)-value)") +
   ylab(expression(paste("-log(adjusted ", italic("p"), "-value)")))+
   xlab("") +
-  theme(axis.text.x=element_text(angle = 60, hjust=1), legend.title=element_blank(), legend.position = "none") + 
+  theme(legend.title=element_blank(), legend.position = "none") + 
   theme(text = element_text(size = 10)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   # scale_colour_manual(values = g_col) +
   geom_hline(yintercept=-log10(class1), colour="dark grey", linetype = "dashed") + 
   geom_hline(yintercept=-log10(class2), colour="dark grey") +
@@ -291,6 +291,7 @@ fig <- ggplot(d) +
   annotate("text", x = 2650906405, y = -log10(class1), label = paste("n =", nrow(sigAtClass1)), vjust = -0.2) +
   scale_y_continuous(expand = c(0,0), limits = c(0, 9)) +
   scale_colour_manual(values = gene_cols)
+
 
 fig <- fig + facet_zoom(x=CHR==28)+ facet_zoom(x=CHR==28 & BP > 35543220 & BP < 35870565)
 fig <- fig + facet_zoom(x=CHR==1) + facet_zoom(x=CHR==1 & BP >= 80546982 & BP <= 80650824) #MASP1
@@ -308,7 +309,7 @@ fig_b <- fig +
 fig_a
 fig_b
 
-ggsave("~/Dropbox/temp/figure_4a.eps", fig_a, dpi = 1000, units = "mm", width = 190, height = 100)
+ggsave("~/Dropbox/temp/figure_4a.tiff", fig_a, dpi = 1000, units = "in", width = 6.85, height = 2.5)
 ggsave("~/Dropbox/temp/figure_4b.eps", fig_b, dpi = 1000, units = "mm", width = 190, height = 100)
 
 

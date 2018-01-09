@@ -77,15 +77,15 @@ for (i in diseased){
     genesGathered[grep(i, genesGathered$group),]$status <- "Infectious"
     print(i)
 }
-genesGathered[is.na(genesGathered$status),]$status <- "Non-infectious"
+genesGathered[is.na(genesGathered$status),]$status <- "Non-Infectious"
 
 ## split into lists for t testing
-healthy <- subset(genesGathered, status == "Non-infectious")
+healthy <- subset(genesGathered, status == "Non-Infectious")
 infec <- subset(genesGathered, status = "Infectious")
 healthy_list <- split(healthy$mean, healthy$Target)
 dis_list <- split(infec$mean, infec$Target)
 
-## Two sample T test to see whether infectiosu vs non-infectious coverages are sig different
+## Two sample T test to see whether infectious vs non-infectious coverages are sig different
 res <- NULL
 for (x in names(healthy_list)) {
   print(x)
@@ -124,28 +124,39 @@ plot(fitted(model), residuals(model))
 ## Print out sig diffs
 library(multcompView)
 library(lsmeans)
-cld(lsmeans(model, "gene", adjust = "tukey"), alpha = 0.05, Letters=letters)
+sigLet <- cld(lsmeans(model, "gene", adjust = "tukey"), alpha = 0.05, Letters=letters)
+sigLet
+sigLet <- as.data.frame(sigLet)
+sigLet$.group <- gsub(" ", "", sigLet$.group)
 cld(lsmeans(model, "status", adjust = "tukey"), alpha = 0.05, Letters=letters)
 
 #
-ggplot(genesGathered, aes(x = gene, y = mean)) + 
+a<-ggplot(genesGathered, aes(x = gene, y = mean)) + 
   geom_boxplot(aes(fill = status)) +
-  theme_bw() + 
+  theme_classic() + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   theme(legend.position = c(1,1), legend.justification = c(1,1), legend.background = element_rect(linetype = "solid", colour = "black"), legend.title = element_blank()) +
   scale_fill_manual(values = c("light grey", "dark grey")) +
-  ylab("Mean coverage of each targeted gene by subgroup")
+  ylab("Mean depth of coverage") +
+  geom_text(data = sigLet, aes(x = gene, y = lsmean*1.3, label = .group)) +
+  theme(panel.grid = element_blank()) +
+  xlab("")
+a
 
-ggplot(genesGathered, aes(x = status, y = mean)) + 
+b<-ggplot(genesGathered, aes(x = status, y = mean)) + 
   geom_boxplot() +
-  theme_bw() + 
+  theme_classic() + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   theme(legend.position = c(1,1), legend.justification = c(1,1), legend.background = element_rect(linetype = "solid", colour = "black"), legend.title = element_blank()) +
   scale_fill_manual(values = c("light grey", "dark grey")) +
-  ylab("Mean coverage of each targeted gene by subgroup") +
-  geom_jitter()
+  ylab("Mean depth of coverage") + 
+  theme(panel.grid = element_blank()) +
+  xlab("")
+b
+library(gridExtra)
+grid.arrange(a,b, ncol = 2)             
+
 
 ggplot(genesGathered, aes(x=mean)) + geom_histogram(bins = 100)
 shapiro.test(subset(genesGathered, status == "Non-infectious")$mean)
-       
-             
+
