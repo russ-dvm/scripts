@@ -25,7 +25,7 @@ a <- ggplot(tf, aes(x = V24)) +
   theme(text = element_text(size = 11)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   xlab("") +
-  ylab("Number of predicted TFBS") +
+  ylab("Number of predicted TFBS \ncontaining a SNV") +
   scale_y_continuous(expand = c(0,0), limits = c(0,30))
 a
 
@@ -35,7 +35,7 @@ b <- ggplot(tf, aes(x = V12)) +
   theme(text = element_text(size = 11)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   xlab("") +
-  ylab("Number of occurances") +
+  ylab("Frequency of a TFBS containing a \nSNV by TF family") +
   scale_y_continuous(expand = c(0,0), limits = c(0,40))
 b
 

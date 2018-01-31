@@ -142,7 +142,11 @@ a <- ggplot(colecTrimmed, aes(x = reorder(colecTrimmed$Gene, colecTrimmed$Rate, 
   ggtitle("a)") +
   theme(plot.title = element_text(hjust = -0.14, size = 10)) +
   theme(panel.grid.major.x = element_blank(), panel.grid.minor.y = element_blank()) +
-  stat_compare_means(method = "wilcox.test", comparisons = sigRe, label = "p.format") 
+  annotate("text", label = paste(expression("\u2020")), x = 1, y = 25) +
+  annotate("text", label = paste(expression("\u2021")), x = 2, y = 25) + 
+  annotate("text", label = paste(expression("\u2020")), x = 3, y = 25) +
+  stat_summary(fun.y = mean, colour = "grey56", geom = "text", label = "....", size = 4)
+  
 a
 
 b<- ggplot(subset(colecTrimmed, colecTrimmed$Gene != "Total"), aes(x = Region, y = Rate*1000)) +
@@ -151,10 +155,11 @@ b<- ggplot(subset(colecTrimmed, colecTrimmed$Gene != "Total"), aes(x = Region, y
   ylab("Variant density (per kb) by region") +
   xlab("") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
-  # stat_summary(fun.y = mean, colour = "grey", geom = "text", label = "----", size = 8) +
   ggtitle("b)") + 
   theme(plot.title = element_text(hjust = -0.14, size = 10)) +
-  theme(panel.grid.major.x = element_blank(), panel.grid.minor.y = element_blank())
+  theme(panel.grid.major.x = element_blank(), panel.grid.minor.y = element_blank()) +
+  stat_summary(fun.y = mean, colour = "grey56", geom = "text", label = "..........", size = 4)
+
 b
 
 grid.arrange(a, b, ncol = 2)

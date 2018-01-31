@@ -129,19 +129,42 @@ sigLet
 sigLet <- as.data.frame(sigLet)
 sigLet$.group <- gsub(" ", "", sigLet$.group)
 cld(lsmeans(model, "status", adjust = "tukey"), alpha = 0.05, Letters=letters)
+sigLet$status <- "Infectious"
 
 #
-a<-ggplot(genesGathered, aes(x = gene, y = mean)) + 
-  geom_boxplot(aes(fill = status)) +
+a<-ggplot(genesGathered, aes(x = gene, y = mean, fill = status)) + 
+  geom_boxplot() +
   theme_classic() + 
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   theme(legend.position = c(1,1), legend.justification = c(1,1), legend.background = element_rect(linetype = "solid", colour = "black"), legend.title = element_blank()) +
-  scale_fill_manual(values = c("light grey", "dark grey")) +
+  scale_fill_manual(values = c("grey78", "grey58")) +
   ylab("Mean depth of coverage") +
   geom_text(data = sigLet, aes(x = gene, y = lsmean*1.3, label = .group)) +
   theme(panel.grid = element_blank()) +
+  stat_summary(fun.y = mean, colour = "grey98", geom = "text", label = "....", size = 4, position = position_dodge(width = 0.78)) +
+  # stat_summary(fun.y = mean, colour = "black", geom = "point", shape = 18, size = 2.5, position = position_dodge(width = 0.8)) +
   xlab("")
 a
+ggsave(a, file="~/Dropbox/temp/Fig2.eps", width = 174, height = 90, units = "mm")
+
+
+#Bar chart is perhaps a better choise as it highlights mean and SE, which is really what the 2-way ANOVA with least-square means post-hoc is testing.
+#In order to label the bar chart need to have a status column in the sig let dataframe. arbitrarily chosen between infectious/non-infectious.
+# In the end BL, JSL and I agreed to stick with the boxplots, but to add in the mean and be more descriptive in the figure legend
+
+a1 <- ggplot(ab, aes(x = gene, y = mean, fill = status)) + 
+  theme_classic() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(ymin=mean-se, ymax = mean+se), position = position_dodge(width = 0.9), width = 0.25) +
+  theme(legend.position = c(1,1), legend.justification = c(1,1), legend.background = element_rect(linetype = "solid", colour = "black"), legend.title = element_blank()) +
+  scale_fill_manual(values = c("orange", "grey")) +
+  ylab("Mean depth of coverage") +
+  xlab("") +
+  scale_y_continuous(limits = c(0,300), expand = c(0,0)) +
+  geom_text(data = sigLet, aes(x = gene, y = lsmean*1.2, label = .group))
+a1
+ggsave(a1, file="~/Dropbox/temp/fig2.eps", width = 174, height = 90, units = "mm")
 
 b<-ggplot(genesGathered, aes(x = status, y = mean)) + 
   geom_boxplot() +
