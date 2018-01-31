@@ -165,8 +165,14 @@ d$CHR <- as.factor(d$CHR)
 #add the end limit to chrY for minor_ticks
 minor_ticks <- c(minor_ticks, tail(minor_ticks, 1) + 1637716)
 
-#Determine the significance cutoff:
-
+##Add gene names
+# geneNames <- complete_results[,c(1,5,22)]
+# geneNames$key <- paste(geneNames$snp_id, geneNames$FDR, sep = ":")
+# geneNames <- geneNames[,-c(2,3)]
+# 
+# d$key <- paste(d$SNP, d$P, sep = ":")
+# 
+# e <- merge(d, geneNames, all = T)
 
 ##GGPLOT MOD BY RUSSELL FRASER
 #scale_x_continous seems to break the x-axis of the facet_zoom
@@ -194,6 +200,8 @@ ggplot(d) +
   xlab("Chromosome") +
   theme(text = element_text(size = 10)) #+
   # geom_text_repel(data=subset(d, d$logp >= 3), aes(x=pos, y = logp, label = SNP), nudge_x = 0.1)
+
+
 
 ggsave("~/Dropbox/figure1.tiff", dpi = 600, units = "mm", width = 190, height = 100)
 

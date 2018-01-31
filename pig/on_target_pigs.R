@@ -1,4 +1,4 @@
-library(grid)
+library(gridExtra)
 library(tidyverse)
 
 ####JUST ONTARGET READS####
@@ -94,7 +94,7 @@ ggplot(v_d, aes(x=average_coverage, y = freq)) +
   geom_point() + 
   geom_smooth(method = "lm") +
   stat_cor(method = "pearson", label.x = 2500, label.y = 2500, hjust = 1, vjust = 0) + 
-  ylab("Frequency of variants") +
+  ylab("Number of variants") +
   xlab("Average coverage") +
   theme_classic()
 
