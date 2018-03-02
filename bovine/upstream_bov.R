@@ -7,7 +7,7 @@ tf <- read.table("~/bovine/merged_runs/tfbs/intersection_meme-cis/all.summarized
 tf_count <- as.data.frame(table(tf$V24))
 
 combined <- merge(tf_count, subset(colecTrimmedByGene, Region == "5kb_from_start"))
-ggplot(combined, aes(x = FReq, y = No.variants)) + geom_point() + geom_smooth(method = "lm")
+ggplot(combined, aes(x = Freq, y = No.variants)) + geom_point() + geom_smooth(method = "lm")
 cor(combined$Freq, combined$No.variants)
 
 tf_levels <- as.data.frame(table(tf$V12))
@@ -35,12 +35,13 @@ b <- ggplot(tf, aes(x = V12)) +
   theme(text = element_text(size = 11)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   xlab("") +
-  ylab("Frequency of a TFBS containing a \nSNV by TF family") +
+  ylab("Number of TFBS containing a \nSNV by TF family") +
   scale_y_continuous(expand = c(0,0), limits = c(0,40))
 b
 
 library(gridExtra)
 grid.arrange(a, b, nrow = 2)
+
 
 all <- read.table("~/bovine/merged_runs/tfbs/cis-bp/all.condensed", h = F, sep = "\t")
 ggplot(all, aes(x = V19)) + geom_histogram(stat = "count")
