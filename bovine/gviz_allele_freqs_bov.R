@@ -25,7 +25,7 @@ btau_mart <- useMart("ensembl", dataset="btaurus_gene_ensembl")
 # startMasp <- 80546982; endMasp <- 80650824; nameMasp <- "MASP1"; chrMasp <- 1; justMasp <- "left"
 
 ## COLEC LOCUS
-# start <- 35543220; end <- 35870565; name <- "Collectin Locus"; chr <- 28; just <- "left"
+start <- 35543220; end <- 35870565; name <- "Collectin Locus"; chr <- 28; just <- "left"
 
 ## COLEC11
 # start <- 112867044; end <- 112896491; name <- "COLEC11"; chr <- 8; just <- "right"
@@ -34,10 +34,10 @@ btau_mart <- useMart("ensembl", dataset="btaurus_gene_ensembl")
 # start <- 106773026; end <- 106834643; name <- "FCN1"; chr <- 11; just <- "left";
 
 ## COLEC12
-start <-35629346; end <- 35866133; name <- "COLEC12"; chr <- 24; just <- "right"
+# start <-35629346; end <- 35866133; name <- "COLEC12"; chr <- 24; just <- "right"
 
 ##Now make sure to include the "mart" option in the following, with mart = btau_mart
-bmtMasp <- BiomartGeneRegionTrack(genome = "BosTau8", biomart = btau_mart, name = nameMasp, collapseTranscripts = T, chromosome = chrMasp, start = startMasp, end = endMasp, shape = "arrow", transcriptAnnotation = "symbol", just.group = justMasp)
+bmtMasp <- BiomartGeneRegionTrack(genome = "BosTau8", biomart = btau_mart, name = name, collapseTranscripts = T, chromosome = chr, start = start, end = end, shape = "arrow", transcriptAnnotation = "symbol", just.group = just)
 
 bmt <- BiomartGeneRegionTrack(genome = "BosTau8", biomart = btau_mart, name = name, collapseTranscripts = T, chromosome = chr, start = start, end = end, shape = "arrow", transcriptAnnotation = "symbol", just.group = just)
 ##Need to fix the bmt track, as the coordinates for certain genes are not the same as what we used (eg the collectin locus -sfpa/mbl)
@@ -120,7 +120,7 @@ plotTracks(c(gtrack, bmtMasp, maspVar, dtrackMasp, targetTrack), from = startMas
 popViewport(1)
 pushViewport(viewport(layout.pos.col = 1, layout.pos.row = 2))
 
-plotTracks(c(gtrack, geneTrack, colecVar, dtrackMasp, targetTrack), from = start, to = end, sizes = c(0.5,0.5,1,1,0.5), background.title = "white", fontcolor.title = "white", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7, add = T)
+plotTracks(c(gtrack, geneTrack, colecVar, dtrack, targetTrack), from = start, to = end, sizes = c(0.5,0.5,1,1,0.5), background.title = "white", fontcolor.title = "white", col.axis = "black", fontsize = 10, cex.axis = 0.7, cex.title = 0.7, add = T)
 
 dev.off()
 

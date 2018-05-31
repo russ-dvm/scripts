@@ -24,7 +24,13 @@ new$status[is.na(new$status)] <- "normal"
 
 
 ## Frequency of genotypes between diseased and normal pigs - all pigs plotted
-ggplot(new, aes(x = score, fill = status, colour = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + xlab("")
+ggplot(new, aes(x = score, fill = status, colour = status)) + 
+  geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + 
+  facet_wrap(~SNP) + 
+  xlab("# of alternate alleles") +
+  theme_bw() + 
+  scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "D") +
+  scale_colour_viridis(begin = 0.35, end = 0.8, discrete = T, option = "D") 
 
 
 ## import plink phenotype files to subset data by pathogen
@@ -74,19 +80,19 @@ sept_sub_sig <- subset(sept_sub, sept_sub$SNP %in% sept_sig)
 pneu_sub_sig <- subset(pneu_sub, pneu_sub$SNP %in% pneu_sig)
 
 ##Plots
-ecoli.bar <- ggplot(ecoli_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
+ecoli.bar <- ggplot(ecoli_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "D", labels = c("E. coli", "Normal")) + xlab("# of alternate alleles") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
 
-myco.bar <- ggplot(myco_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
+myco.bar <- ggplot(myco_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "D", labels = c("Mycoplasma", "Normal")) + xlab("# of alternate alleles") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
 
-flu.bar <- ggplot(flu_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
+flu.bar <- ggplot(flu_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "D", labels = c("SIV", "Normal")) + xlab("# of alternate alleles") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
 
-prrs.bar <- ggplot(prrs_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
+prrs.bar <- ggplot(prrs_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "D", labels = c("PRRSV", "Normal")) + xlab("# of alternate alleles") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
 
-enteritis.bar <- ggplot(enteritis_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
+enteritis.bar <- ggplot(enteritis_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("# of alternate alleles") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
 
-pneu.bar <- ggplot(pneu_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
+pneu.bar <- ggplot(pneu_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("# of alternate alleles") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
 
-sept.bar <- ggplot(sept_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
+sept.bar <- ggplot(sept_sub_sig, aes(x = score, fill = status)) + geom_histogram(aes(y=..density..), position = "dodge", bins = 3, binwidth =1 ,boundary = 0.5) + facet_wrap(~SNP) + theme_bw() + scale_fill_viridis(begin = 0.35, end = 0.8, discrete = T, option = "A") + xlab("# of alternate alleles") + ylab("Proportion of pigs") + theme(legend.position = "top", legend.title = element_blank())
 
 
 ## make eQTL plots to go along with this
@@ -135,7 +141,7 @@ mega_1 <- separate(mega, snp, c("snp"))
 mega_2 <- mega_1[!is.na(mega_1$genotype),]
 mega_2$genotype <- as.factor(mega_2$genotype)
 
-box <- ggplot(subset(mega_2, mega_2$snp %in% enteritis_sig), aes(x = genotype, y = expression)) + geom_boxplot(aes(group = genotype_letters)) + geom_jitter(aes(shape=genotype, color=genotype), width = 0.1) + facet_wrap(~snp) + theme_bw() + theme(legend.position = "none") + geom_smooth(method = "lm", se = F) + ylab("log2(expression)")
+box <- ggplot(subset(mega_2, mega_2$snp %in% flu_sig), aes(x = genotype, y = expression)) + geom_boxplot(aes(group = genotype_letters)) + geom_jitter(aes(shape=genotype, color=genotype), width = 0.1) + facet_wrap(~snp) + theme_bw() + theme(legend.position = "none") + geom_smooth(method = "lm", se = F) + ylab("log2(expression)")
 
-grid.arrange(enteritis.bar, box)
+grid.arrange(flu.bar, box)
 

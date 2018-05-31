@@ -133,10 +133,10 @@ colecTrimmed$Region <- factor(colecTrimmed$Region, levels = c("5-50 kb upstream"
 ####PLOTS####
 a <- ggplot(colecTrimmed, aes(x = reorder(colecTrimmed$Gene, colecTrimmed$Rate, function(x)-median(x)), y = Rate*1000)) + 
   geom_boxplot() + 
-  theme(text = element_text(size = 10)) +
   # stat_summary(fun.y = mean, colour = "grey", geom = "text", label = "----") +
   theme_classic() +
-  ylab("Variant density (per kb) by gene") +
+  theme(text = element_text(size = 10)) +
+    ylab("Variant density (per kb) by gene") +
   xlab("") +
   theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
   ggtitle("a)") +

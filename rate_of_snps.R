@@ -273,7 +273,7 @@ ind_snp_spread$ratio <- ind_snp_spread$indel/ind_snp_spread$snp
 ggplot(ind_snp_spread, aes(x = indel, y = snp)) + geom_point(aes(colour = V1, shape = V1, size = 4)) + geom_smooth(method = lm) +
   scale_shape_manual(values = c(3:19))
 
-cor(ind_snp_spread$snp, ind_snp_spread$indel)
+cor.test(ind_snp_spread$snp, ind_snp_spread$indel)
 ## Strong correlation between SNPs and INDELs, which supports the thoery that there are more point mutations in areas that have more INDELs... 
 
 

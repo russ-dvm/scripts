@@ -274,8 +274,8 @@ fig <- ggplot(d) +
   xlab("") +
   theme(axis.text.x=element_text(angle = 60, hjust=1), legend.title=element_blank(), legend.position = "none") + 
   theme(text = element_text(size = 10)) +
-  scale_colour_manual(values = g_col) + 
-  geom_hline(yintercept=-log10(intercept), colour="red") + 
+  scale_colour_manual(values = eg_col) + 
+  geom_hline(yintercept=-log10(fdr), colour="red") + 
   facet_zoom(x=CHR==1)+ facet_zoom(x=CHR==1 & BP > 88892979 & BP < 89006643)
 
 fig_a <- fig + 
